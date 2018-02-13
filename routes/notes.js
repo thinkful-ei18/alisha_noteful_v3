@@ -23,7 +23,7 @@ router.get('/notes', (req, res, next) => {
     .then( note => {
       res.json(note);
     })
-    .catch( err => next(err) );
+    .catch(err => next(err));
 
 });
 
@@ -33,15 +33,24 @@ router.get('/notes/:id', (req, res, next) => {
 
   Note.findById(req.params.id)
     .then( note => res.json(note) )
-    .catch(err => next(err) );
+    .catch(err => next(err));
 
 });
 
 /* ========== POST/CREATE AN ITEM ========== */
 router.post('/notes', (req, res, next) => {
 
-  console.log('Create a Note');
-  res.location('path/to/new/document').status(201).json({ id: 2 });
+  const { title, content } = req.body;
+
+  if (!title || !content) {
+    const message = 'Missing `title` or `content` in request body';
+    console.error(message);
+    return res.status(400).send(message);
+  }
+
+  Note.create( { title, content } )
+    .then( note => res.json(note))
+    .catch(err => next(err));
 
 });
 
