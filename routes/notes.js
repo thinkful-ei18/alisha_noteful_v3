@@ -3,16 +3,32 @@
 const express = require('express');
 // Create an router instance (aka "mini-app")
 const router = express.Router();
+const mongoose = require('mongoose');
+mongoose.Promise = global.Promise;
+
+const Note = require('../models/note');
+
 
 /* ========== GET/READ ALL ITEM ========== */
 router.get('/notes', (req, res, next) => {
+  console.log('abcd');
+  const { searchTerm } = req.query;
+  let filter = {};
 
-  console.log('Get All Notes');
-  res.json([
-    { id: 1, title: 'Temp 1' }, 
-    { id: 2, title: 'Temp 2' }, 
-    { id: 3, title: 'Temp 3' }
-  ]);
+  if (searchTerm) {
+    const re = new RegExp(searchTerm, 'i');
+    // console.log('REGEX', re);
+    filter.title = { $regex: re };
+  }
+  console.log('FILTER', filter);
+  return Note.find(filter)
+    // .select('title created')
+    // .sort('created')
+    .then( note => {
+      console.log('NOTE', note);
+      res.json(note);
+    })
+    .catch( err => next(err) );
 
 });
 
