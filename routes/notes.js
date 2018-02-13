@@ -3,6 +3,7 @@
 const express = require('express');
 // Create an router instance (aka "mini-app")
 const router = express.Router();
+const mongoose = require('mongoose');
 
 const Note = require('../models/note');
 
@@ -37,6 +38,7 @@ router.get('/notes/:id', (req, res, next) => {
 
 });
 
+
 /* ========== POST/CREATE AN ITEM ========== */
 router.post('/notes', (req, res, next) => {
 
@@ -54,13 +56,31 @@ router.post('/notes', (req, res, next) => {
 
 });
 
+
 /* ========== PUT/UPDATE A SINGLE ITEM ========== */
 router.put('/notes/:id', (req, res, next) => {
 
-  console.log('Update a Note');
-  res.json({ id: 2 });
+  const { title, content } = req.body;
+
+  if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+    const message = (
+      `Request path id: (${req.params.id}) doesn't exist.`);
+    console.error(message);
+    return res.status(400).json({ message: message });
+  }
+
+  if (!title || !content) {
+    const message = 'Missing `title` or `content` in request body';
+    console.error(message);
+    return res.status(400).send(message);
+  }  
+
+  Note.findByIdAndUpdate(req.params.id, { $set: [ title, content ] })
+    .then( note => res.json(note).status(204).end())
+    .catch( err => next(err));
 
 });
+
 
 /* ========== DELETE/REMOVE A SINGLE ITEM ========== */
 router.delete('/notes/:id', (req, res, next) => {
