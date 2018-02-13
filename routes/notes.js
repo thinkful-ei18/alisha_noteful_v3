@@ -75,7 +75,9 @@ router.put('/notes/:id', (req, res, next) => {
     return res.status(400).send(message);
   }  
 
-  Note.findByIdAndUpdate(req.params.id, { $set: [ title, content ] })
+  const updatedNote = { title, content, create: Date };
+
+  Note.findByIdAndUpdate(req.params.id, updatedNote, {new: true} )
     .then( note => res.json(note).status(204).end())
     .catch( err => next(err));
 
