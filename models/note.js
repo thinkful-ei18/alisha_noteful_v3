@@ -5,7 +5,7 @@ const mongoose = require('mongoose');
 const notesSchema = mongoose.Schema({
   title: String,
   content: String,
-  create: Date.now
+  create: Date
 });
 
 const Note = mongoose.model('Note', notesSchema);
