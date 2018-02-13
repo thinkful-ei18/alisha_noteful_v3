@@ -1,10 +1,6 @@
 'use strict';
 
 const mongoose = require('mongoose');
-// mongoose.Promise = global.Promise;
-
-// const { PORT, MONGODB_URI } = require('.config');
-
 
 const notesSchema = mongoose.Schema({
   title: String,
@@ -12,6 +8,6 @@ const notesSchema = mongoose.Schema({
   create: Date.now
 });
 
-const note = mongoose.model('note', notesSchema);
+const Note = mongoose.model('Note', notesSchema);
 
-module.exports = note;
+module.exports = Note;
