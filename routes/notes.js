@@ -18,7 +18,7 @@ router.get('/notes', (req, res, next) => {
     filter.title = { $regex: re };
   }
   return Note.find(filter)
-    .select('title created')
+    .select('title content created')
     .sort('created')
     .then( note => {
       res.json(note);
