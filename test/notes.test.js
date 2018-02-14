@@ -72,6 +72,7 @@ describe('start with testing hooks, then run tests', () => {
     it('should return a 400 error for the wrong ID', function () {
       const badId = '1908';
       const spy = chai.spy();
+
       return chai.request(app).get(`/v3/notes/${badId}`)
         .then(spy)
         .then(() => {
@@ -110,6 +111,26 @@ describe('start with testing hooks, then run tests', () => {
           expect(apiRes.body.id).to.equal(note.id);
           expect(apiRes.body.title).to.equal(note.title);
           expect(apiRes.body.content).to.equal(note.content);
+        });
+    });
+
+    it('should return an error when missing the `title` or `content` properties', () => {
+      const invalidNote = {
+        'title': 'just one!'
+      };
+      const spy = chai.spy();
+
+      return chai.request(app).post('/v3/notes/')
+        .send(invalidNote)
+        .then(spy)
+        .then(() => {
+          expect(spy).to.not.have.been.called();
+        })
+        .catch(err => {
+          const res = err.response;
+          expect(res).to.be.json;
+          expect(res).to.have.status(400);
+          expect(res.body.message).to.equal('Missing `title` or `content` in request body');
         });
     });
 

@@ -51,9 +51,9 @@ router.post('/notes', (req, res, next) => {
   const { title, content } = req.body;
 
   if (!title || !content) {
-    const message = 'Missing `title` or `content` in request body';
-    console.error(message);
-    return res.status(400).send(message);
+    const err = new Error('Missing `title` or `content` in request body'); 
+    err.status = 400; 
+    return next(err); 
   }
 
   Note.create( { title, content } )
