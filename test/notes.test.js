@@ -32,4 +32,29 @@ describe('testing hooks', () => {
     return mongoose.disconnect();
   });
 
+
+  describe('GET methods', () => {
+    it('', () => {
+
+    });
+  });
+
+  describe('POST methods', () => {
+    it('', () => {
+
+    });
+  });
+
+  describe('PUT methods', () => {
+    it('', () => {
+
+    });
+  });
+
+  describe('DELETE methods', () => {
+    it('', () => {
+
+    });
+  });
+
 });
