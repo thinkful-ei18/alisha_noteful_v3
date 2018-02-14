@@ -89,7 +89,30 @@ describe('start with testing hooks, then run tests', () => {
 
   describe('POST methods', () => {
 
-    
+    it('should post one note', () => {
+      let createdNote = {
+        title: 'amazing grace',
+        content: 'how sweet the sound'
+      };
+
+      let note;
+      return Note.create(createdNote)
+        .then( dbData => {
+          note = dbData;
+          return chai.request(app).get(`/v3/notes/${dbData.id}`);
+        })
+        .then( apiRes => {
+          expect(apiRes).to.have.status(200);
+          expect(apiRes).to.be.json;
+          expect(apiRes.body).to.be.a('object');
+          expect(apiRes.body).to.have.keys('title', 'content', 'id', 'created');
+
+          expect(apiRes.body.id).to.equal(note.id);
+          expect(apiRes.body.title).to.equal(note.title);
+          expect(apiRes.body.content).to.equal(note.content);
+        });
+    });
+
   });
 
   describe('PUT methods', () => {
