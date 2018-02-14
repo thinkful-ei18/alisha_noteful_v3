@@ -6,15 +6,16 @@ const chaiHttp = require('chai-http');
 const chaiSpies = require('chai-spies');
 const seedNotes = require('../db/seed/notes.json');
 const mongoose = require('mongoose');
+const Note = require('../models/note');
 const { TEST_MONGODB_URI } = require('../config.js');
 const expect = chai.expect;
-const Note = require('../models/note');
-
 
 chai.use(chaiHttp);
 chai.use(chaiSpies);
 
-describe('testing hooks', () => {
+
+
+describe('start with testing hooks, then run tests', () => {
   before(function() {
     return mongoose.connect(TEST_MONGODB_URI, { autoIndex: false });
   });
@@ -68,12 +69,27 @@ describe('testing hooks', () => {
         });
     });
 
+    it('should return a 400 error for the wrong ID', function () {
+      const badId = '1908';
+      const spy = chai.spy();
+      return chai.request(app).get(`/v3/notes/${badId}`)
+        .then(spy)
+        .then(() => {
+          expect(spy).to.not.have.been.called();
+        })
+        .catch( err => {
+          const res = err.response;
+          expect(res).to.have.status(400);
+          expect(res.body.message).to.equal('The `id` is not valid');
+        });
+    });
+
   });
 
-  describe('POST methods', () => {
-    it('', () => {
 
-    });
+  describe('POST methods', () => {
+
+    
   });
 
   describe('PUT methods', () => {
