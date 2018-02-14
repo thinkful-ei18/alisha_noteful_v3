@@ -34,8 +34,18 @@ describe('testing hooks', () => {
 
 
   describe('GET methods', () => {
-    it('', () => {
 
+    it('should return all notes', () => {
+      const dbPromise = Note.find();
+      const apiPromise = chai.request(app).get('/v3/notes');
+
+      return Promise.all([dbPromise, apiPromise])
+        .then( ([dbData, apiRes]) => {
+          expect(apiRes).to.have.status(200);
+          expect(apiRes).to.be.json;
+          expect(apiRes.body).to.be.a('array');
+          expect(apiRes.body).to.have.length(dbData.length);
+        });
     });
   });
 
