@@ -4,11 +4,12 @@ const app = require('../server');
 const chai = require('chai');
 const chaiHttp = require('chai-http');
 const chaiSpies = require('chai-spies');
-const seedNotes = require('../db/seed/notes.json');
 const mongoose = require('mongoose');
+const seedNotes = require('../db/seed/notes.json');
 const Note = require('../models/note');
-const { TEST_MONGODB_URI } = require('../config.js');
 const expect = chai.expect;
+
+const { TEST_MONGODB_URI } = require('../config.js');
 
 chai.use(chaiHttp);
 chai.use(chaiSpies);
@@ -136,14 +137,53 @@ describe('start with testing hooks, then run tests', () => {
 
   });
 
+
   describe('PUT methods', () => {
-    it('', () => {
+
+    it('should update the note', () => {
+      let updateNote = {
+        'title': 'that saved a wretch like me',
+        'content': 'I once was lost, but now am found'
+      };
+    
+      let note;
+
+      return Note.findOne()
+        .then(dbData => {
+          note = dbData;
+          return chai.request(app)
+            .put(`/v3/notes/${note.id}`)
+            .send(updateNote);
+        })
+        .then(apiRes => {
+          expect(apiRes).to.have.status(200);
+          expect(apiRes).to.be.json;
+          expect(apiRes.body).to.be.a('object');
+          expect(apiRes.body).to.have.keys('title', 'content', 'id', 'created');
+
+          expect(apiRes.body.id).to.equal(note.id);
+          expect(apiRes.body.title).to.equal(updateNote.title);
+          expect(apiRes.body.content).to.equal(updateNote.content);
+        });
+    });
+
+    it('should respond with a 404 for an invalid id', () => {
 
     });
+
+    it('should return an error when missing "title" or "content" fields', () => {
+
+    });
+
   });
 
+
   describe('DELETE methods', () => {
-    it('', () => {
+    it('should delete an item by id', () => {
+
+    });
+
+    it('should respond with a 404 for an invalid id', () => {
 
     });
   });
