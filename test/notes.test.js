@@ -47,6 +47,27 @@ describe('testing hooks', () => {
           expect(apiRes.body).to.have.length(dbData.length);
         });
     });
+
+    it('should return one note', () => {
+      let dbData;
+
+      return Note.findOne().select('id title content')
+        .then( result => {
+          dbData = result;
+          return chai.request(app).get(`/v3/notes/${dbData.id}`);
+        })
+        .then( apiRes => {
+          expect(apiRes).to.have.status(200);
+          expect(apiRes).to.be.json;
+          expect(apiRes.body).to.be.a('object');
+          expect(apiRes.body).to.have.keys('title', 'content', 'id', 'created');
+
+          expect(apiRes.body.id).to.equal(dbData.id);
+          expect(apiRes.body.title).to.equal(dbData.title);
+          expect(apiRes.body.content).to.equal(dbData.content);
+        });
+    });
+
   });
 
   describe('POST methods', () => {
