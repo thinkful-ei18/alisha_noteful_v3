@@ -32,6 +32,12 @@ router.get('/notes', (req, res, next) => {
 /* ========== GET/READ A SINGLE ITEM ========== */
 router.get('/notes/:id', (req, res, next) => {
 
+  if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+    const err = new Error('The `id` is not valid');
+    err.status = 400;
+    return next(err);
+  }
+
   Note.findById(req.params.id)
     .then( note => res.json(note) )
     .catch(err => next(err));
