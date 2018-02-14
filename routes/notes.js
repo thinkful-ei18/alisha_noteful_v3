@@ -6,7 +6,7 @@ const router = express.Router();
 const mongoose = require('mongoose');
 
 const Note = require('../models/note');
-
+//
 
 /* ========== GET/READ ALL ITEM ========== */
 router.get('/notes', (req, res, next) => {
@@ -19,8 +19,8 @@ router.get('/notes', (req, res, next) => {
     filter.title = { $regex: re };
   }
   return Note.find(filter)
-    .select('title content created')
-    .sort('created')
+    // .select('title content create')
+    .sort({create: -1})
     .then( note => {
       res.json(note);
     })
@@ -75,10 +75,13 @@ router.put('/notes/:id', (req, res, next) => {
     return res.status(400).send(message);
   }  
 
-  const updatedNote = { title, content, create: Date };
+  const updatedNote = { title, content, create: Date.now() };
 
   Note.findByIdAndUpdate(req.params.id, updatedNote, {new: true} )
-    .then( note => res.json(note).status(204).end())
+    .then( note => {
+      console.log('NOTE', note);
+      res.json(note).status(204).end();
+    })
     .catch( err => next(err));
 
 });
