@@ -141,7 +141,7 @@ describe('start with testing hooks, then run tests', () => {
   describe('PUT methods', () => {
 
     it('should update the note', () => {
-      let updateNote = {
+      const updateNote = {
         'title': 'that saved a wretch like me',
         'content': 'I once was lost, but now am found'
       };
@@ -167,8 +167,26 @@ describe('start with testing hooks, then run tests', () => {
         });
     });
 
-    it('should respond with a 404 for an invalid id', () => {
+    it.only('should respond with a 404 for an invalid id', () => {
+      const badId = '1908';
+      const updateNote = {
+        'title': 'that saved a wretch like me',
+        'content': 'I once was lost, but now am found'
+      };
+      const spy = chai.spy();
 
+      return chai.request(app)
+        .put(`/v3/notes/${badId}`)
+        .send(updateNote)
+        .then(spy)
+        .then(() => {
+          expect(spy).to.not.have.been.called();
+        })
+        .catch(err => {
+          const res = err.response;
+          expect(res).to.have.status(400);
+          expect(res.body.message).to.equal('The `id` is not valid');
+        });
     });
 
     it('should return an error when missing "title" or "content" fields', () => {
