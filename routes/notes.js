@@ -19,8 +19,8 @@ router.get('/notes', (req, res, next) => {
     filter.title = { $regex: re };
   }
   return Note.find(filter)
-    // .select('title content create')
-    .sort({create: -1})
+    .select('title created')
+    .sort({created: -1})
     .then( note => {
       res.json(note);
     })
@@ -75,7 +75,7 @@ router.put('/notes/:id', (req, res, next) => {
     return res.status(400).send(message);
   }  
 
-  const updatedNote = { title, content, create: Date.now() };
+  const updatedNote = { title, content, created: Date.now() };
 
   Note.findByIdAndUpdate(req.params.id, updatedNote, {new: true} )
     .then( note => {
