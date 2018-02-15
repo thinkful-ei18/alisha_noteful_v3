@@ -75,8 +75,31 @@ router.post('/folders', (req, res, next) => {
 
 /* ========== PUT/UPDATE A SINGLE ITEM ========== */
 router.put('/folders/:id', (req, res, next) => {
+  
+  const id = req.params.id;
+  const { name } = req.body;
 
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    const err = new Error('Please input a proper id in order to complete this change');
+    err.status = 400;
+    return next(err);
+  }
 
+  if (!name) {
+    const err = new Error('This folder must have a name!');
+    err.status = 404;
+    return next(err);
+  }
+
+  Folder.findByIdAndUpdate( id, {name}, {new: true} )
+    .then( folder => res.json(folder))
+    .catch( err => {
+      if (err.code === 11000) {
+        err = new Error('That folder name already exists');
+        err.status = 400;
+      }
+      next(err);
+    });
 
 });
 
