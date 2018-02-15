@@ -48,8 +48,27 @@ router.get('/folders/:id', (req, res, next) => {
 
 /* ========== POST/CREATE AN ITEM ========== */
 router.post('/folders', (req, res, next) => {
+  const { name } = req.body;
 
-  
+  if(!name) {
+    const err = new Error('This folder has no name!');
+    err.status = 404;
+    return next(err); 
+  }
+
+  Folder.create( {name} )
+    .then( note => {
+      res.location(`${req.originalUrl}/${note.id}`)
+        .status(201)
+        .json(note);
+    })
+    .catch( err => {
+      if (err.code === 11000) {
+        err = new Error('That folder name already exists');
+        err.status = 400;
+      }
+      next(err);
+    });
 
 });
 
