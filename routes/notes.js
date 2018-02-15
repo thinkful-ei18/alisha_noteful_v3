@@ -11,15 +11,19 @@ const Note = require('../models/note.model');
 /* ========== GET/READ ALL ITEM ========== */
 router.get('/notes', (req, res, next) => {
 
-  const { searchTerm } = req.query;
-
+  const { searchTerm, folderId } = req.query;
+  
   let filter = {};
   let projection = {};
   let sort = {created: -1}; // default sorting
 
+  if (folderId) { 
+    filter.folderId = folderId;
+  } 
+
   if (searchTerm) {
-    filter.$text = { $search: searchTerm };
-    projection.score = { $meta: 'textScore' };
+    filter.$text = { $search: searchTerm };   // https://docs.mongodb.com/manual/reference/operator/query/text/
+    projection.score = { $meta: 'textScore' }; // https://docs.mongodb.com/manual/reference/operator/projection/meta/
     sort = projection;
   }
   
