@@ -25,14 +25,22 @@ router.get('/folders', (req, res, next) => {
 /* ========== GET/READ A SINGLE ITEM ========== */
 router.get('/folders/:id', (req, res, next) => {
 
-  if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-    const err = new Error('The `id` is not valid');
+  if (!mongoose.Types.ObjectId.isValid(req.params.id)) { // i.e. 'abc123'
+    const err = new Error('Please input a proper id');
     err.status = 400;
     return next(err);
   }
 
   Folder.findById(req.params.id)
-    .then( note => res.json(note))
+    .then( note => {
+      if (note !== null) { // i.e. '111111111111111111111105'. the format is right, but it doesn't match an id in the db
+        res.json(note);
+      } else {
+        const err = new Error('That id cannot be found');
+        err.status = 404;
+        return next(err);
+      }
+    })
     .catch( err => next(err));
 
 });
