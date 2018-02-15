@@ -75,7 +75,7 @@ router.post('/notes', (req, res, next) => {
 /* ========== PUT/UPDATE A SINGLE ITEM ========== */
 router.put('/notes/:id', (req, res, next) => {
 
-  const { title, content } = req.body;
+  const { title, content, folderId } = req.body;
 
   if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
     const err = new Error (`Request path id: (${req.params.id}) doesn't exist.`);
@@ -89,7 +89,12 @@ router.put('/notes/:id', (req, res, next) => {
     return next(err);
   }  
 
-  const updatedNote = { title, content, created: Date.now() };
+  const updatedNote = { 
+    title, 
+    content, 
+    folderId, 
+    created: Date.now() 
+  };
 
   Note.findByIdAndUpdate(req.params.id, updatedNote, {new: true} )
     .then( note => {
