@@ -1,13 +1,11 @@
 language: node_js
 node_js: node
 env:
-  - NODE_ENV=test
-# services:
-#   - [DATABASE-TYPE]  
-# deploy:
-#   provider: heroku
-#   api_key:
-#     secure: [YOUR-API-KEY]
-#   app: [YOUR-APP-NAME]
-#   on:
-#     repo: [YOUR-APP-REPO]
+- NODE_ENV=test
+deploy:
+  provider: heroku
+  api_key:
+    secure: Fb6eCqUHnoI60euuhrVldS0NO/vqjL0gRoG+PKv4U75CevPO73OMlJpiH97xoMQFc/Vu753+xMyPDK3Vn1kgrmaJU3b/rwYRTBXx4Vv9hLPTlRx8x7tN5cLce9sRuj0WC1GL9aPlGh1sfWyenIZ/CootqPJXpYBtjVotCtmplmtL7iik9hJ5yLi7PqNsq2CHy1ufrm8O8YC6gvMCve4COSt9NBOM61rMLsHoK4WMIbWlV4740+lazeJG75LCwIGopGoXuHdr9Q8XFYyRM5k/2O0meCr/PawnmCsz70/EDPew3214N6zl8C9DRugo5WaaGqNqsg2NJiXyorgEYcnp2E58H/f1uLA3X/tFARRKrwh7kgas/UFb+Qgt9GktsV8c+J00tHSsOf2nzIxM/zv8lqoT4W9CkgLTAxe9SNelz58/ut1MsKDvxkp1rRHRZEDxpyJ2lpsP1lzKevwNJUQyW1EoJYu1QYrsUDPZqEe2nUkY+SAgcPh/z6FFbGN09sLV2YKidAQuZU92x5/PBYF/niC3RvR3zi+uoTc1EoO+ok0zBH+uEm+6ZGJwFMolmAxBiPAzeHo5MXSwYmPf8c+gGU5ze7dyogG2C2Ul7toeHHcWGZSW5TV+2HuR7gFjeh49brs+3bs8elXRzDoenQcfTaK9DUx2fMTh8gh4ApyXRP0=
+  app: alisha-noteful-v3
+  on:
+    repo: thinkful-ei18/alisha_noteful_v3
