@@ -51,7 +51,7 @@ describe('DB and API tests for folders.routes.js', () => {
           expect(apiRes).to.be.json;
           expect(apiRes.body).to.be.an('array');
           expect(apiRes.body.length).to.equal(dbData.length);
-          apiRes.body.forEach( note => expect(note).to.have.keys('id', 'name'));
+          apiRes.body.forEach( note => expect(note).to.have.keys('name', 'id'));
         });
     });
 
@@ -62,6 +62,23 @@ describe('DB and API tests for folders.routes.js', () => {
 
     it('should return one folder', () => {
       
+      let dbData;
+
+      return Folder.findOne()
+        .then( folder => {
+          dbData = folder;
+          return chai.request(app)
+            .get(`/v3/folders/${dbData.id}`);
+        })
+        .then( apiRes => {
+          expect(apiRes).to.be.json;
+          expect(apiRes).to.have.status(200);
+          expect(apiRes.body).to.be.an('object');
+          expect(apiRes.body).to.have.keys('name', 'id');
+
+          expect(apiRes.body.name).to.equal(dbData.name);
+          expect(apiRes.body.id).to.equal(dbData.id);
+        });
     });
 
     it('should return a 400 error for an invalid ID', function () {
