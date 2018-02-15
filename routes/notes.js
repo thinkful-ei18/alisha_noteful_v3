@@ -69,23 +69,21 @@ router.put('/notes/:id', (req, res, next) => {
   const { title, content } = req.body;
 
   if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-    const message = (
-      `Request path id: (${req.params.id}) doesn't exist.`);
-    console.error(message);
-    return res.status(400).json({ message: message });
+    const err = new Error (`Request path id: (${req.params.id}) doesn't exist.`);
+    err.status = 400;
+    return next(err);
   }
 
   if (!title || !content) {
-    const message = 'Missing `title` or `content` in request body';
-    console.error(message);
-    return res.status(400).send(message);
+    const err = new Error('Missing `title` or `content` in request body');
+    err.status = 400;
+    return next(err);
   }  
 
   const updatedNote = { title, content, created: Date.now() };
 
   Note.findByIdAndUpdate(req.params.id, updatedNote, {new: true} )
     .then( note => {
-      console.log('NOTE', note);
       res.json(note).status(204).end();
     })
     .catch( err => next(err));

@@ -167,7 +167,7 @@ describe('start with testing hooks, then run tests', () => {
         });
     });
 
-    it.only('should respond with a 404 for an invalid id', () => {
+    it('should respond with a 400 for an invalid id', () => {
       const badId = '1908';
       const updateNote = {
         'title': 'that saved a wretch like me',
@@ -183,14 +183,37 @@ describe('start with testing hooks, then run tests', () => {
           expect(spy).to.not.have.been.called();
         })
         .catch(err => {
-          const res = err.response;
-          expect(res).to.have.status(400);
-          expect(res.body.message).to.equal('The `id` is not valid');
+          expect(err).to.have.status(400);
+          expect(err.response.body.message).to.equal(`Request path id: (${badId}) doesn't exist.`);
         });
     });
 
-    it('should return an error when missing "title" or "content" fields', () => {
+    it('should return an error when missing "title" or "content" properties', () => {
+      const invalidNote = {
+        'title': 'just one!'
+      };
+      const spy = chai.spy();
+      let note;
 
+      return Note.findOne()
+        .then(dbData => {
+          note = dbData;
+          return chai.request(app)
+            .put(`/v3/notes/${note.id}`)
+            .send(invalidNote);
+        })
+        .then(spy)
+        .then(() => {
+          expect(spy).to.not.have.been.called();
+        })
+        .catch(err => {
+          // console.log('ERR', err);
+          // const res = err.response;
+          // console.log('RES', res);
+          expect(err).to.be.json;
+          expect(err).to.have.status(400);
+          expect(err.response.body.message).to.equal('Missing `title` or `content` in request body');
+        });
     });
 
   });
