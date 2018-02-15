@@ -54,7 +54,7 @@ describe('DB and API tests for notes.js', () => {
         });
     });
 
-    it.only('should return the notes resulting from a search', () => {
+    it('should return the notes resulting from a search', () => {
       let term = 'ways';
 
       const dbPromise = Note.find(
@@ -272,3 +272,5 @@ describe('DB and API tests for notes.js', () => {
   });
 
 });
+
+// commenting for travis
