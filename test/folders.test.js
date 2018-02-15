@@ -41,7 +41,18 @@ describe('DB and API tests for folders.routes.js', () => {
   describe('GET methods /v3/folders', () => {
 
     it('should return all folders', () => {
-      
+      const dbPromise = Folder.find(); // connects straight to the db and pulls data
+      const apiPromise = chai.request(app)
+        .get('/v3/folders'); // connects to the db THROUGH the api to get data. if they don't match, something is wrong with the api(routes)
+
+      return Promise.all([dbPromise, apiPromise])
+        .then(([dbData, apiRes]) => {
+          expect(apiRes).to.have.status(200);
+          expect(apiRes).to.be.json;
+          expect(apiRes.body).to.be.an('array');
+          expect(apiRes.body.length).to.equal(dbData.length);
+          apiRes.body.forEach( note => expect(note).to.have.keys('id', 'name'));
+        });
     });
 
   });
