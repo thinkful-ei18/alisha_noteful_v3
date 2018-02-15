@@ -4,7 +4,7 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 
-const Note = require('../models/note.model');
+// const Note = require('../models/note.model');
 const Folder = require('../models/folder.model');
 
 
@@ -13,6 +13,7 @@ const Folder = require('../models/folder.model');
 router.get('/folders', (req, res, next) => {
 
   Folder.find()
+    .sort('name')
     .then( folders => {
       res.json(folders);
     })
@@ -24,7 +25,15 @@ router.get('/folders', (req, res, next) => {
 /* ========== GET/READ A SINGLE ITEM ========== */
 router.get('/folders/:id', (req, res, next) => {
 
+  if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+    const err = new Error('The `id` is not valid');
+    err.status = 400;
+    return next(err);
+  }
 
+  Folder.findById(req.params.id)
+    .then( note => res.json(note))
+    .catch( err => next(err));
 
 });
 
@@ -32,7 +41,7 @@ router.get('/folders/:id', (req, res, next) => {
 /* ========== POST/CREATE AN ITEM ========== */
 router.post('/folders', (req, res, next) => {
 
-
+  
 
 });
 
