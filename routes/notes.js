@@ -57,7 +57,7 @@ router.get('/notes/:id', (req, res, next) => {
 /* ========== POST/CREATE AN ITEM ========== */
 router.post('/notes', (req, res, next) => {
 
-  const { title, content } = req.body;
+  const { title, content, folderId } = req.body;
 
   if (!title || !content) {
     const err = new Error('Missing `title` or `content` in request body'); 
@@ -65,7 +65,7 @@ router.post('/notes', (req, res, next) => {
     return next(err); 
   }
 
-  Note.create( { title, content } )
+  Note.create( { title, content, folderId } )
     .then( note => res.json(note))
     .catch(err => next(err));
 
