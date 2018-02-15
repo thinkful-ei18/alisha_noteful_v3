@@ -12,17 +12,22 @@ const Note = require('../models/note');
 router.get('/notes', (req, res, next) => {
 
   const { searchTerm } = req.query;
+
   let filter = {};
+  let projection = {};
+  let sort = {created: -1}; // default sorting
 
   if (searchTerm) {
-    const re = new RegExp(searchTerm, 'i');
-    filter.title = { $regex: re };
+    filter.$text = { $search: searchTerm };
+    projection.score = { $meta: 'textScore' };
+    sort = projection;
   }
-  return Note.find(filter)
+  
+  Note.find(filter, projection)
     .select('title created')
-    .sort({created: -1})
-    .then( note => {
-      res.json(note);
+    .sort(sort)
+    .then(notes => {
+      res.json(notes);
     })
     .catch(err => next(err));
 
@@ -94,8 +99,14 @@ router.put('/notes/:id', (req, res, next) => {
 /* ========== DELETE/REMOVE A SINGLE ITEM ========== */
 router.delete('/notes/:id', (req, res, next) => {
 
+  if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+    const err = new Error('Request path id doesn\'t exist.');
+    err.status = 404;
+    return next(err);
+  }  
+
   Note.findByIdAndRemove(req.params.id)
-    .then( note => res.status(204).end())
+    .then( res.status(204).end() )
     .catch(err => next(err));
 });
 

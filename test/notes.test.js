@@ -16,28 +16,32 @@ chai.use(chaiSpies);
 
 
 
-describe('start with testing hooks, then run tests', () => {
-  before(function() {
-    return mongoose.connect(TEST_MONGODB_URI, { autoIndex: false });
-  });
+/* ========== TESTING HOOKS ========== */
+before(function () {
+  return mongoose.connect(TEST_MONGODB_URI, { autoIndex: false });
+});
 
-  beforeEach(function () {
-    return Note.insertMany(seedNotes)
-      .then(() => Note.ensureIndexes());
-  });
+beforeEach(function () {
+  return Note.insertMany(seedNotes)
+    .then(() => Note.ensureIndexes());
+});
 
-  afterEach(function () {
-    return mongoose.connection.db.dropDatabase();
-  });
+afterEach(function () {
+  return mongoose.connection.db.dropDatabase();
+});
 
-  after(function () {
-    return mongoose.disconnect();
-  });
+after(function () {
+  return mongoose.disconnect();
+});
 
 
-  describe('GET methods', () => {
 
-    it('should return all notes', () => {
+/* ========== ROUTE TESTS ========== */
+describe('DB and API tests for notes.js', () => {
+
+  describe('GET methods /v3/notes', () => {
+
+    it('should return unsearched notes list', () => {
       const dbPromise = Note.find();
       const apiPromise = chai.request(app).get('/v3/notes');
 
@@ -49,6 +53,30 @@ describe('start with testing hooks, then run tests', () => {
           expect(apiRes.body).to.have.length(dbData.length);
         });
     });
+
+    it.only('should return the notes resulting from a search', () => {
+      let term = 'ways';
+
+      const dbPromise = Note.find(
+        { $text: { $search: term } },
+        { score: { $meta: 'textScore' } })
+        .sort({ score: { $meta: 'textScore' } });
+      const apiPromise = chai.request(app)
+        .get(`/v3/notes?searchTerm=${term}`);
+
+      return Promise.all([dbPromise, apiPromise])
+        .then(([dbData, apiRes]) => {
+          expect(apiRes).to.have.status(200);
+          expect(apiRes).to.be.json;
+          expect(apiRes.body).to.be.an('array');
+          expect(apiRes.body.length).to.equal(dbData.length);
+        });
+    });
+
+  });
+
+
+  describe('GET by id /v3/notes/:id', () => {
 
     it('should return one note', () => {
       let dbData;
@@ -89,7 +117,7 @@ describe('start with testing hooks, then run tests', () => {
   });
 
 
-  describe('POST methods', () => {
+  describe('POST methods /v3/notes', () => {
 
     it('should post one note', () => {
       let createdNote = {
@@ -138,7 +166,7 @@ describe('start with testing hooks, then run tests', () => {
   });
 
 
-  describe('PUT methods', () => {
+  describe('PUT methods /v3/notes/:id', () => {
 
     it('should update the note', () => {
       const updateNote = {
@@ -210,9 +238,9 @@ describe('start with testing hooks, then run tests', () => {
   });
 
 
-  describe('DELETE methods', () => {
+  describe('DELETE methods /v3/note/:id', () => {
 
-    it.only('should delete an item by id', () => {
+    it('should delete an item by id', () => {
       let note;
 
       return Note.findOne()
@@ -227,8 +255,20 @@ describe('start with testing hooks, then run tests', () => {
     });
 
     it('should respond with a 404 for an invalid id', () => {
+      const spy = chai.spy();
 
+      return chai.request(app)
+        .delete('/v3/notes/1908')
+        .then(spy)
+        .then(() => {
+          expect(spy).to.have.not.been.called();
+        })
+        .catch(err => {
+          expect(err).to.have.status(404);
+          expect(err.response.body.message).to.equal('Request path id doesn\'t exist.');
+        });
     });
+
   });
 
 });
