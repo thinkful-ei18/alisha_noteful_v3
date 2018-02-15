@@ -272,5 +272,3 @@ describe('DB and API tests for notes.js', () => {
   });
 
 });
-
-// commenting for travis
