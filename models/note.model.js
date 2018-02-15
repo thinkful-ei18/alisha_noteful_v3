@@ -5,12 +5,11 @@ const mongoose = require('mongoose');
 const noteSchema = mongoose.Schema({
   title: {type: String, index: true},
   content: { type: String, index: true },
-  created: { type: Date, default: Date.now() }
+  created: { type: Date, default: Date.now() }, 
+  folderId: { type: mongoose.Schema.Types.ObjectId, ref: 'Folder' }
 });
 
 noteSchema.index( {title: 'text', content: 'text'} );
-
-const Note = mongoose.model('Note', noteSchema);
 
 noteSchema.set('toObject', {
   transform: function (doc, ret) {
@@ -19,5 +18,7 @@ noteSchema.set('toObject', {
     delete ret.__v;
   }
 });
+
+const Note = mongoose.model('Note', noteSchema);
 
 module.exports = Note;
