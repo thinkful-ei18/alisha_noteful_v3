@@ -193,7 +193,7 @@ describe('start with testing hooks, then run tests', () => {
         'title': 'just one!'
       };
       const spy = chai.spy();
- 
+
       return chai.request(app)
         .put('/v3/notes/000000000000000000000002')
         .send(invalidNote)
@@ -211,8 +211,19 @@ describe('start with testing hooks, then run tests', () => {
 
 
   describe('DELETE methods', () => {
-    it('should delete an item by id', () => {
 
+    it.only('should delete an item by id', () => {
+      let note;
+
+      return Note.findOne()
+        .then( dbData => {
+          note = dbData;
+          return chai.request(app)
+            .delete(`/v3/notes/${note.id}`);
+        })
+        .then(response => {
+          expect(response).to.have.status(204);
+        });
     });
 
     it('should respond with a 404 for an invalid id', () => {
