@@ -120,6 +120,21 @@ router.delete('/folders/:id', (req, res, next) => {
     .then( res.status(204).end() )
     .catch( err => next(err) );
 
+  // on delete, set Note.folderId to null
+  // Folder.findByIdAndRemove(id)
+  //   .then( id => {
+  //     Note.updateMany({ folderId: id })
+  //   })
+  //   .then (
+  //     if (/* the id matches the folder*/) {
+  //       // delete
+  //     }
+  //   )
+  //   .then(res.status(204).end())
+  //   .catch(err => next(err));
+
+  // restrict the delete if the folder contains notes
+
 });
 
 module.exports = router;
