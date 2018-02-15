@@ -193,27 +193,18 @@ describe('start with testing hooks, then run tests', () => {
         'title': 'just one!'
       };
       const spy = chai.spy();
-      let note;
-
-      return Note.findOne()
-        .then(dbData => {
-          note = dbData;
-          return chai.request(app)
-            .put(`/v3/notes/${note.id}`)
-            .send(invalidNote);
-        })
+ 
+      return chai.request(app)
+        .put('/v3/notes/000000000000000000000002')
+        .send(invalidNote)
         .then(spy)
         .then(() => {
           expect(spy).to.not.have.been.called();
         })
         .catch(err => {
-          // console.log('ERR', err);
-          // const res = err.response;
-          // console.log('RES', res);
-          expect(err).to.be.json;
           expect(err).to.have.status(400);
           expect(err.response.body.message).to.equal('Missing `title` or `content` in request body');
-        });
+        });    
     });
 
   });
