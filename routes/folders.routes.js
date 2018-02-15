@@ -12,7 +12,11 @@ const Folder = require('../models/folder.model');
 /* ========== GET/READ ALL ITEM ========== */
 router.get('/folders', (req, res, next) => {
 
-
+  Folder.find()
+    .then( folders => {
+      res.json(folders);
+    })
+    .catch( err => next(err));
 
 });
 
