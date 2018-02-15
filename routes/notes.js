@@ -5,8 +5,8 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 
-const Note = require('../models/note');
-//
+const Note = require('../models/note.model');
+
 
 /* ========== GET/READ ALL ITEM ========== */
 router.get('/notes', (req, res, next) => {
