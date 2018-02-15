@@ -4,7 +4,7 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 
-// const Note = require('../models/note.model');
+const Note = require('../models/note.model');
 const Folder = require('../models/folder.model');
 
 
@@ -32,9 +32,9 @@ router.get('/folders/:id', (req, res, next) => {
   }
 
   Folder.findById(req.params.id)
-    .then( note => {
-      if (note !== null) { // i.e. '111111111111111111111105'. the format is right, but it doesn't match an id in the db
-        res.json(note);
+    .then( folder => {
+      if (folder !== null) { // i.e. '111111111111111111111105'. the format is right, but it doesn't match an id in the db
+        res.json(folder);
       } else {
         const err = new Error('That id cannot be found');
         err.status = 404;
@@ -57,10 +57,10 @@ router.post('/folders', (req, res, next) => {
   }
 
   Folder.create( {name} )
-    .then( note => {
-      res.location(`${req.originalUrl}/${note.id}`)
+    .then( folder => {
+      res.location(`${req.originalUrl}/${folder.id}`)
         .status(201)
-        .json(note);
+        .json(folder);
     })
     .catch( err => {
       if (err.code === 11000) {
@@ -106,8 +106,19 @@ router.put('/folders/:id', (req, res, next) => {
 
 /* ========== DELETE/REMOVE A SINGLE ITEM ========== */
 router.delete('/folders/:id', (req, res, next) => {
+  const id = req.params.id;
 
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    const err = new Error('Please input a proper id in order to delete this folder');
+    err.status = 400;
+    return next(err);
+  }
 
+  // deletes folder AND associated notes
+  Folder.findByIdAndRemove(id)
+    .then( () => Note.deleteMany({folderId: id}) )
+    .then( res.status(204).end() )
+    .catch( err => next(err) );
 
 });
 
