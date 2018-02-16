@@ -17,7 +17,9 @@ router.get('/folders', (req, res, next) => {
     .then( folders => {
       res.json(folders);
     })
-    .catch( err => next(err));
+    // .catch( err => next(err)); // this is the longer way of writing out the code below
+    .catch(next);
+
 
 });
 
@@ -25,7 +27,7 @@ router.get('/folders', (req, res, next) => {
 /* ========== GET/READ A SINGLE ITEM ========== */
 router.get('/folders/:id', (req, res, next) => {
 
-  if (!mongoose.Types.ObjectId.isValid(req.params.id)) { // i.e. 'abc123'
+  if (!mongoose.Types.ObjectId.isValid(req.params.id)) { // // mongoose requires ID's to be 16 characters. anything else will trigger this error. i.e. 'abc123'
     const err = new Error('Please input a proper id');
     err.status = 400;
     return next(err);
@@ -33,15 +35,14 @@ router.get('/folders/:id', (req, res, next) => {
 
   Folder.findById(req.params.id)
     .then( folder => {
-      if (folder !== null) { // i.e. '111111111111111111111105'. the format is right, but it doesn't match an id in the db
-        res.json(folder);
-      } else {
+      if (folder === null) { // i.e. '111111111111111111111105'. the format is right, but it doesn't match an id in the db
         const err = new Error('That id cannot be found');
         err.status = 404;
         return next(err);
-      }
+      } 
+      res.json(folder);
     })
-    .catch( err => next(err));
+    .catch(next);
 
 });
 
@@ -94,7 +95,7 @@ router.put('/folders/:id', (req, res, next) => {
 
   Folder.findByIdAndUpdate( id, {name}, {new: true} )
     .then( folder => res.json(folder))
-    .catch( err => next(err));
+    .catch(next);
 
 });
 
@@ -113,7 +114,7 @@ router.delete('/folders/:id', (req, res, next) => {
   Folder.findByIdAndRemove(id)
     .then( () => Note.deleteMany({folderId: id}) )
     .then( res.status(204).end() )
-    .catch( err => next(err) );
+    .catch(next);
 
   // on delete, set Note.folderId to null
   // Folder.findByIdAndRemove(id)
