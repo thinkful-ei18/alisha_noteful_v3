@@ -33,13 +33,14 @@ router.get('/tags/:id', (req, res, next) => {
 
   Tag.findById(id)
     .then( tag => {
-      if (tag !== null) {
-        res.json(tag).status(200);
-      } else {
-        next();
+      if (tag === null) {
+        const err = new Error('That id cannot be found');
+        err.status = 404;
+        return next(err);
       }
+      res.json(tag).status(200);
     })
-    .catch( err => next(err));
+    .catch(next);
 
 });
 
@@ -47,6 +48,18 @@ router.get('/tags/:id', (req, res, next) => {
 /* ========== POST/CREATE AN ITEM ========== */
 router.post('/tags', (req, res, next) => {
 
+  const { name } = req.body;
+
+  Tag.create({name})
+    .then( tag => {
+      if (!name) {
+        const err = new Error('All tags must have a name');
+        err.status = 404;
+        return next(err);
+      }
+      res.json(tag).status(200);
+    })
+    .catch(next);
 
 });
 
