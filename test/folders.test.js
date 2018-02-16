@@ -116,7 +116,24 @@ describe('DB and API tests for folders.routes.js', () => {
   describe('POST methods /v3/folders', () => {
 
     it('should create one folder', () => {
-     
+      const createFolder = { name: 'Boop' };
+      let folder;
+
+      return Folder.create(createFolder)
+        .then ( dbData => {
+          folder = dbData;
+          return chai.request(app)
+            .post('/v3/folders')
+            .send(createFolder);
+        })
+        .then( apiRes => {
+          expect(apiRes).to.be.json;
+          expect(apiRes).to.have.status(201);
+          expect(apiRes.body).to.be.an('object');
+          expect(apiRes.body).to.have.keys('name', 'id');
+
+          expect(apiRes.body.name).to.equal(folder.name);
+        });
     });
 
     it('should return an error when missing the `name` property', () => {
