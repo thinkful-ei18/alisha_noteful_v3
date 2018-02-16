@@ -136,7 +136,7 @@ describe('DB and API tests for folders.routes.js', () => {
         });
     });
 
-    it.only('should return an error when missing the `name` property', () => {
+    it('should return an error when missing the `name` property', () => {
       const createFolder = { name: '' };
       const spy = chai.spy();
 
@@ -158,7 +158,24 @@ describe('DB and API tests for folders.routes.js', () => {
   describe('PUT methods /v3/folders/:id', () => {
 
     it('should update the folder name', () => {
-      
+      const createFolder = { name: 'Whoop' };
+      let folder;
+
+      return Folder.findOne()
+        .then(  dbData => {
+          folder = dbData;
+          return chai.request(app)
+            .put(`/v3/folders/${folder.id}`)
+            .send(createFolder);
+        })
+        .then( apiRes => {
+          expect(apiRes).to.have.status(200); /* why is it receiving a status of 200 if I set it to 201 in the route?? */
+          expect(apiRes).to.be.json;
+          expect(apiRes.body).to.be.an('object');
+          expect(apiRes.body).to.have.keys('name', 'id');
+
+          expect(apiRes.body.id).to.equal(folder.id);
+        });
     });
 
     it('should respond with a 400 for a nonexistent id', () => {
