@@ -197,6 +197,14 @@ describe('DB and API tests for folders.routes.js', () => {
 
     it('should delete an item by id', () => {
       
+      return Folder.findOne()
+        .then( dbData => {
+          return chai.request(app)
+            .delete(`/v3/folders/${dbData.id}`);
+        })
+        .then( apiRes => {
+          expect(apiRes).to.have.status(204);
+        });
     });
 
     it('should respond with a 400 for an invalid id', () => {
