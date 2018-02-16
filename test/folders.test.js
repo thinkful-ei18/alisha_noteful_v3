@@ -97,7 +97,17 @@ describe('DB and API tests for folders.routes.js', () => {
     });
 
     it('should return a 404 error for a nonexistent ID', function () {
+      const spy =chai.spy();
 
+      return chai.request(app)
+        .get('/v3/folders/111111111111111111111105')
+        .then(spy)
+        .then(() => expect(spy).to.have.not.been.called())
+        .catch(err => {
+          const res = err.response;
+          expect(res).to.have.status(404);
+          expect(res.body.message).to.equal('That id cannot be found');
+        });
     });
 
   });
