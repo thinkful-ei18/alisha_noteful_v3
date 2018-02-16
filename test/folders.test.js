@@ -179,7 +179,20 @@ describe('DB and API tests for folders.routes.js', () => {
     });
 
     it('should respond with a 400 for a nonexistent id', () => {
-      
+      const createFolder = { name: 'Whoop' };
+      const spy = chai.spy();
+
+      return chai.request(app)
+        .put('/v3/folders/1908')
+        .send(createFolder)
+        .then(spy)
+        .then( spy => expect(spy).to.have.not.been.called())
+        .catch( err => {
+          let res = err.response;
+          expect(res).to.have.status(400);
+          expect(res.body.message).to.equal('Please input a proper id in order to complete this change');
+        });
+
     });
 
     it('should return 404 when missing the `name` property', () => {
