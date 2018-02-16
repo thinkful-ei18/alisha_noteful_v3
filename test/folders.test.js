@@ -233,7 +233,17 @@ describe('DB and API tests for folders.routes.js', () => {
     });
 
     it('should respond with a 400 for an invalid id', () => {
-      
+      const spy = chai.spy();
+
+      return chai.request(app)
+        .delete('/v3/folders/1908')
+        .then(spy)
+        .then(spy => expect(spy).to.have.not.been.called())
+        .catch(err => {
+          let res = err.response;
+          expect(res).to.have.status(400);
+          expect(res.body.message).to.equal('Please input a proper id in order to delete this folder');
+        });
     });
 
   });
