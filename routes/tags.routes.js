@@ -25,7 +25,7 @@ router.get('/tags/:id', (req, res, next) => {
   const id = req.params.id; 
 
   if (!mongoose.Types.ObjectId.isValid(id)) { // mongoose requires ID's to be 12 or 24 characters. anything else will trigger this error.
-    const err = new Error('Please input a proper id');
+    const err = new Error('Please input a 12 or 24 character length id');
     err.status = 400;
     return next(err);
   }
@@ -49,16 +49,14 @@ router.post('/tags', (req, res, next) => {
 
   const { name } = req.body;
 
-  Tag.create({name})
-    .then( tag => {
-      if (!name) {
-        const err = new Error('All tags must have a name');
-        err.status = 404;
-        return next(err);
-      }
+  if (!name) {
+    const err = new Error('All tags must have a name');
+    err.status = 404;
+    return next(err);
+  }
 
-      res.json(tag).status(200);
-    })
+  Tag.create( {name} )
+    .then( tag => res.json(tag).status(200))
     .catch(next);
 
 });
@@ -71,7 +69,7 @@ router.put('/tags/:id', (req, res, next) => {
   const { name } = req.body;
 
   if (!mongoose.Types.ObjectId.isValid(id)) {
-    const err = new Error('Please input a proper id');
+    const err = new Error('Please input a 12 or 24 character length id');
     err.status = 400;
     return next(err);
   }
@@ -84,6 +82,12 @@ router.put('/tags/:id', (req, res, next) => {
 
   Tag.findByIdAndUpdate(id, {name}, {new: true})
     .then( tag => {
+      if (tag === null) {
+        const err = new Error('That id cannot be found');
+        err.status = 404;
+        return next(err);
+      }
+
       res.json(tag).status(201);
     })
     .catch(next);
@@ -94,8 +98,30 @@ router.put('/tags/:id', (req, res, next) => {
 /* ========== DELETE/REMOVE A SINGLE ITEM ========== */
 router.delete('/tags/:id', (req, res, next) => {
   
-  Tag.findByIdAndRemove(req.params.id)
-    .then(res.status(204).end())
+  const id = req.params.id;
+
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    const err = new Error('Please input a 12 or 24 character length id');
+    err.status = 400;
+    return next(err);
+  }
+
+  if (id === null) {
+    const err = new Error('That id cannot be found');
+    err.status = 404;
+    return next(err);
+  }
+  
+  Tag.findByIdAndRemove(id)
+    .then( tag => {
+      if (tag === null) {
+        const err = new Error('That id cannot be found');
+        err.status = 404;
+        return next(err);
+      }
+
+      res.status(204).end();
+    })
     .catch(next);
 
 });
