@@ -93,7 +93,10 @@ router.put('/tags/:id', (req, res, next) => {
 
 /* ========== DELETE/REMOVE A SINGLE ITEM ========== */
 router.delete('/tags/:id', (req, res, next) => {
-
+  
+  Tag.findByIdAndRemove(req.params.id)
+    .then(res.status(204).end())
+    .catch(next);
 
 });
 
