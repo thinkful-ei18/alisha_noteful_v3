@@ -196,6 +196,22 @@ describe('DB and API tests for folders.routes.js', () => {
     });
 
     it('should return 404 when missing the `name` property', () => {
+      const spy = chai.spy();
+      const createFolder = { name: '' };
+
+      return Folder.findOne()
+        .then(dbData => {
+          return chai.request(app)
+            .put(`/v3/folders/${dbData.id}`)
+            .send(createFolder);
+        })
+        .then(spy)
+        .then(spy => expect(spy).to.have.not.been.called())
+        .catch( err => {
+          let res = err.response;
+          expect(res).to.have.status(404);
+          expect(res.body.message).to.equal('This folder must have a name!');
+        });
       
     });
 
