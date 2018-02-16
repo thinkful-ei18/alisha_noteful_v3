@@ -16,13 +16,30 @@ router.get('/tags', (req, res, next) => {
     .sort('name')
     .then( tags => res.json(tags))
     .catch( err => next(err));
-    
+
 });
 
 
 /* ========== GET/READ A SINGLE ITEM ========== */
 router.get('/tags/:id', (req, res, next) => {
+  
+  const id = req.params.id; 
 
+  if (!mongoose.Types.ObjectId.isValid(id)) { // mongoose requires ID's to be 16 characters. anything else will trigger this error.
+    const err = new Error('Please input a proper id');
+    err.status = 400;
+    return next(err);
+  }
+
+  Tag.findById(id)
+    .then( tag => {
+      if (tag !== null) {
+        res.json(tag).status(200);
+      } else {
+        next();
+      }
+    })
+    .catch( err => next(err));
 
 });
 
