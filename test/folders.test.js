@@ -136,8 +136,20 @@ describe('DB and API tests for folders.routes.js', () => {
         });
     });
 
-    it('should return an error when missing the `name` property', () => {
-      
+    it.only('should return an error when missing the `name` property', () => {
+      const createFolder = { name: '' };
+      const spy = chai.spy();
+
+      return chai.request(app)
+        .post('/v3/folders')
+        .send(createFolder)
+        .then(spy)
+        .then (() => expect(spy).to.have.not.been.called())
+        .catch( err => {
+          const res = err.response;
+          expect(res.body.message).to.equal('This folder has no name!');
+          expect(res).to.have.status(404);
+        });
     });
 
   });
