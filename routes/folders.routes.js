@@ -78,7 +78,8 @@ router.put('/folders/:id', (req, res, next) => {
   
   const id = req.params.id;
   const { name } = req.body;
-
+  console.log('NAME', name);
+  console.log('ID', id);
   if (!mongoose.Types.ObjectId.isValid(id)) {
     const err = new Error('Please input a proper id in order to complete this change');
     err.status = 400;
@@ -93,13 +94,7 @@ router.put('/folders/:id', (req, res, next) => {
 
   Folder.findByIdAndUpdate( id, {name}, {new: true} )
     .then( folder => res.json(folder))
-    .catch( err => {
-      if (err.code === 11000) {
-        err = new Error('That folder name already exists');
-        err.status = 400;
-      }
-      next(err);
-    });
+    .catch( err => next(err));
 
 });
 

@@ -169,7 +169,7 @@ describe('DB and API tests for folders.routes.js', () => {
             .send(createFolder);
         })
         .then( apiRes => {
-          expect(apiRes).to.have.status(200); /* why is it receiving a status of 200 if I set it to 201 in the route?? */
+          expect(apiRes).to.have.status(200); 
           expect(apiRes).to.be.json;
           expect(apiRes.body).to.be.an('object');
           expect(apiRes.body).to.have.keys('name', 'id');
@@ -213,10 +213,6 @@ describe('DB and API tests for folders.routes.js', () => {
           expect(res.body.message).to.equal('This folder must have a name!');
         });
       
-    });
-
-    it('should return 400 when the folder name already exists', () => {
-
     });
 
   });
