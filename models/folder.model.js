@@ -5,7 +5,8 @@ const mongoose = require('mongoose');
 const folderSchema = mongoose.Schema({
   name: { 
     type: String, 
-    unique: true }
+    unique: true // https://docs.mongodb.com/manual/core/index-unique/
+  } 
 });
 
 // http://mongoosejs.com/docs/guide.html#toObject
