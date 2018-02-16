@@ -12,7 +12,11 @@ const Tag = require('../models/tag.model'); // the collection I'll be referencin
 /* ========== GET/READ ALL ITEM ========== */
 router.get('/tags', (req, res, next) => {
 
-
+  Tag.find()
+    .sort('name')
+    .then( tags => res.json(tags))
+    .catch( err => next(err));
+    
 });
 
 
