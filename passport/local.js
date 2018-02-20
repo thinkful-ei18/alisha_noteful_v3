@@ -1,7 +1,7 @@
 'use strict';
 
 const { Strategy: LocalStrategy } = require('passport-local'); // const LocalStrategy = require('passport-local').Strategy
-const User = require('../models.user.model');
+const User = require('../models/user.model');
 
 const localStrategy = new LocalStrategy( (username, password, done) => {
  
@@ -32,3 +32,5 @@ const localStrategy = new LocalStrategy( (username, password, done) => {
       return done(err);
     });
 });
+
+module.exports = localStrategy;

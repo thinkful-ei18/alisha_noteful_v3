@@ -4,6 +4,8 @@ const express = require('express');
 const morgan = require('morgan');
 const mongoose = require('mongoose');
 mongoose.Promise = global.Promise;
+const passport = require('passport');
+const localStrategy = require('./passport/local');
 
 const { PORT, MONGODB_URI } = require('./config');
 
@@ -11,6 +13,7 @@ const notesRouter = require('./routes/notes');
 const foldersRouter = require('./routes/folders.routes');
 const tagsRouter = require('./routes/tags.routes');
 const usersRouter = require('./routes/users.routes');
+const authRouter = require('./routes/auth');
 
 
 
@@ -28,11 +31,14 @@ app.use(express.static('public'));
 // Parse request body
 app.use(express.json());
 
+passport.use(localStrategy);
+
 // Mount router on "/api"
 app.use('/v3', notesRouter);
 app.use('/v3', foldersRouter);
 app.use('/v3', tagsRouter);
 app.use('/v3', usersRouter);
+app.use('/v3', authRouter);
 
 
 // Catch-all 404

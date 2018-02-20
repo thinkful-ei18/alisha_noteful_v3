@@ -9,6 +9,10 @@ const userSchema = new Schema({
   password: { type: String, required: true}
 });
 
+userSchema.methods.validatePassword = function(password) {
+  return password === this.password;
+};
+
 // http://mongoosejs.com/docs/guide.html#toObject
 userSchema.set('toObject', {
   transform: function (doc, ret) {
