@@ -16,19 +16,16 @@ router.get('/users/:id', (req, res) => {
 });
 
 
-router.post('/users', (req, res) => {
+router.post('/users', (req, res, next) => {
 
   // verify the required fields are present in the req.body
   const requiredFields = [ 'username', 'password' ];
   const missingField = requiredFields.find( field => !(field in req.body));
 
   if (missingField) {
-    return res.status(422).json({
-      code: 422,
-      reason: 'ValidationError',
-      message: 'Missing field',
-      location: missingField
-    });
+    const err = new Error(`Missing '${missingField}' in request body`);
+    err.status = 422;
+    return next(err);
   }
 
   // verify that each of the fields are a string
@@ -38,12 +35,9 @@ router.post('/users', (req, res) => {
   );
 
   if (nonStringField) {
-    return res.status(422).json({
-      code: 422,
-      reason: 'ValidationError',
-      message: 'Incorrect field type: expected string',
-      location: nonStringField
-    });
+    const err = new Error(`Field: '${nonStringField}' must be type String`);
+    err.status = 422;
+    return next(err);
   }
 
   // verify that the un/pw don't have whitespace
@@ -53,29 +47,21 @@ router.post('/users', (req, res) => {
   );
 
   if (nonTrimmedField) {
-    return res.status(422).json({
-      code: 422,
-      reason: 'ValidationError',
-      message: 'Cannot start or end with whitespace',
-      location: nonTrimmedField
-    });
+    const err = new Error(`Field: '${nonTrimmedField}' cannot start or end with whitespace`);
+    err.status = 422;
+    return next(err);
   }
 
   // verify that the length of the un/pw meet the requirements
   const sizedFields = {
-    username: {
-      min: 1
-    },
-    password: {
-      min: 8,
-      max: 72 // bcrypt truncates after 72 characters
-    }
+    username: { min: 1 },
+    password: { min: 8, max: 72 } // bcrypt truncates after 72 characters
   };
 
   const tooSmallField = Object.keys(sizedFields).find(
     field =>
-      'min' in sizedFields[field] && // why this line?
-      req.body[field].trim().length < sizedFields[field].min
+      'min' in sizedFields[field] && // check the sizedFields key to see if it has the 'min' key
+      req.body[field].trim().length < sizedFields[field].min 
   );
 
   const tooLargeField = Object.keys(sizedFields).find(
@@ -84,17 +70,18 @@ router.post('/users', (req, res) => {
       req.body[field].trim().length > sizedFields[field].max
   );
 
-  if (tooSmallField || tooLargeField) {
-    return res.status(422).json({
-      code: 422,
-      reason: 'ValidationError',
-      message: tooSmallField
-        ? `Must be at least ${sizedFields[tooSmallField]
-          .min} characters long`
-        : `Must be at most ${sizedFields[tooLargeField]
-          .max} characters long`,
-      location: tooSmallField || tooLargeField
-    });
+  if (tooSmallField) {
+    const min = sizedFields[tooSmallField].min;
+    const err = new Error(`Field: '${tooSmallField}' must be at least ${min} characters long`);
+    err.status = 422;
+    return next(err);
+  }
+
+  if (tooLargeField) {
+    const max = sizedFields[tooLargeField].max;
+    const err = new Error(`Field: '${tooSmallField}' must be at most ${max} characters long`);
+    err.status = 422;
+    return next(err);
   }
   
   let { fullname = '', username, password } = req.body;
@@ -121,12 +108,13 @@ router.post('/users', (req, res) => {
         fullname
       });
     })
-    .then(user => res.status(201).location(`/v3/users/${user.id}`).json(user.apiRepr()))
-    .catch( err => {
-      if (err.reason === 'ValidationError') {
-        return res.status(err.code).json(err);
+    .then(user => res.status(201).location(`/v3/users/${user.id}`).json(user.apiRepr())
+    .catch(err => {
+      if (err.code === 11000) {
+        err = new Error('The username already exists');
+        err.status = 400;
       }
-      res.status(500).json({ code: 500, message: 'Internal server error' });
+      next(err);
     });
 
 });
