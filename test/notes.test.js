@@ -90,7 +90,7 @@ describe('DB and API tests for notes.js', () => {
           expect(apiRes).to.have.status(200);
           expect(apiRes).to.be.json;
           expect(apiRes.body).to.be.a('object');
-          expect(apiRes.body).to.have.keys('title', 'content', 'id', 'created', 'folderId');
+          expect(apiRes.body).to.have.keys('title', 'content', 'id', 'created', 'folderId', 'tags');
 
           expect(apiRes.body.id).to.equal(dbData.id);
           expect(apiRes.body.title).to.equal(dbData.title);
@@ -135,7 +135,7 @@ describe('DB and API tests for notes.js', () => {
           expect(apiRes).to.have.status(200);
           expect(apiRes).to.be.json;
           expect(apiRes.body).to.be.a('object');
-          expect(apiRes.body).to.have.keys('title', 'content', 'id', 'created');
+          expect(apiRes.body).to.have.keys('title', 'content', 'id', 'created', 'tags');
 
           expect(apiRes.body.id).to.equal(note.id);
           expect(apiRes.body.title).to.equal(note.title);
@@ -187,7 +187,7 @@ describe('DB and API tests for notes.js', () => {
           expect(apiRes).to.have.status(200);
           expect(apiRes).to.be.json;
           expect(apiRes.body).to.be.a('object');
-          expect(apiRes.body).to.have.keys('title', 'content', 'id', 'created', 'folderId');
+          expect(apiRes.body).to.have.keys('title', 'content', 'id', 'created', 'folderId', 'tags');
 
           expect(apiRes.body.id).to.equal(note.id);
           expect(apiRes.body.title).to.equal(updateNote.title);
