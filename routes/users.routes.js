@@ -5,6 +5,8 @@ const router = express.Router();
 
 const User = require('../models/user.model');
 
+
+
 router.post('/users', (req, res, next) => {
   const { fullname, username, password } = req.body;
 
@@ -14,9 +16,31 @@ router.post('/users', (req, res, next) => {
     return next(err);
   }
   
-  User.create( {fullname, username, password} )
-    .then( user => res.json(user).status(201).location(`${req.originalUrl}/${user.id}`))
-    .catch(next);
+  return User.hashPassword(password)
+    .then(digest => {
+      const newUser = {
+        username,
+        password: digest,
+        fullname
+      };
+      return User.create(newUser);
+    })
+    .then(user => res.status(201).location(`/v3/users/${user.id}`).json(user))
+    .catch( err => {
+      if (err.code === 11000) {
+        err = new Error('That username already exists');
+        err.status = 400;
+      }
+      next(err);
+    });
+
+
+
+
+
+  // User.create( {fullname, username, password} )
+  //   .then( user => res.json(user).status(201).location(`${req.originalUrl}/${user.id}`))
+  //   .catch(next);
 });
 
 
