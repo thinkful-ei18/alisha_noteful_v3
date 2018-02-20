@@ -10,9 +10,14 @@ const userSchema = new Schema({
   password: { type: String, required: true}
 });
 
-// userSchema.methods.validatePassword = function(password) {
-//   return password === this.password;
-// };
+
+userSchema.methods.apiRepr = function () {
+  return {
+    id: this.id,
+    username: this.username,
+    fullname: this.fullname
+  };
+};
 
 userSchema.methods.validatePassword = function (password) {
   return bcrypt.compare(password, this.password);
