@@ -38,9 +38,9 @@ after(function () {
 /* ========== ROUTE TESTS ========== */
 describe('DB and API tests for tags.routes.js', () => {
 
-  describe('GET methods /v3/tags', () => {
+  describe('GET ALL /v3/tags', () => {
 
-    it.only('should return all tags', () => {
+    it('should return all tags', () => {
       const dbPromise = Tag.find(); // connects straight to the db and pulls data
       const apiPromise = chai.request(app)
         .get('/v3/tags'); // connects to the db THROUGH the api to get data. if they don't match, something is wrong with the api(routes)
@@ -60,13 +60,13 @@ describe('DB and API tests for tags.routes.js', () => {
 
   describe('GET by id /v3/tags/:id', () => {
 
-    it('should return one folder', () => {
+    it('should return one tag', () => {
 
       let dbData;
 
-      return Folder.findOne()
-        .then(folder => {
-          dbData = folder;
+      return Tag.findOne()
+        .then(tag => {
+          dbData = tag;
           return chai.request(app)
             .get(`/v3/tags/${dbData.id}`);
         })
@@ -91,7 +91,7 @@ describe('DB and API tests for tags.routes.js', () => {
         .catch(err => {
           const res = err.response;
           expect(res).to.have.status(400);
-          expect(res.body.message).to.equal('Please input a proper id');
+          expect(res.body.message).to.equal('Please input a 12 or 24 character length id');
         });
 
     });
@@ -115,16 +115,16 @@ describe('DB and API tests for tags.routes.js', () => {
 
   describe('POST methods /v3/tags', () => {
 
-    it('should create one folder', () => {
-      const createFolder = { name: 'Boop' };
-      let folder;
+    it('should create one tag', () => {
+      const createTag = { name: 'Epsilon' };
+      let tag;
 
-      return Folder.create(createFolder)
+      return Tag.create(createTag)
         .then(dbData => {
-          folder = dbData;
+          tag = dbData;
           return chai.request(app)
             .post('/v3/tags')
-            .send(createFolder);
+            .send(createTag);
         })
         .then(apiRes => {
           expect(apiRes).to.be.json;
@@ -132,22 +132,22 @@ describe('DB and API tests for tags.routes.js', () => {
           expect(apiRes.body).to.be.an('object');
           expect(apiRes.body).to.have.keys('name', 'id');
 
-          expect(apiRes.body.name).to.equal(folder.name);
+          expect(apiRes.body.name).to.equal(tag.name);
         });
     });
 
     it('should return an error when missing the `name` property', () => {
-      const createFolder = { name: '' };
+      const createTag = { name: '' };
       const spy = chai.spy();
 
       return chai.request(app)
         .post('/v3/tags')
-        .send(createFolder)
+        .send(createTag)
         .then(spy)
         .then(() => expect(spy).to.have.not.been.called())
         .catch(err => {
           const res = err.response;
-          expect(res.body.message).to.equal('This folder has no name!');
+          expect(res.body.message).to.equal('All tags must have a name');
           expect(res).to.have.status(404);
         });
     });
@@ -158,15 +158,15 @@ describe('DB and API tests for tags.routes.js', () => {
   describe('PUT methods /v3/tags/:id', () => {
 
     it('should update the folder name', () => {
-      const createFolder = { name: 'Whoop' };
-      let folder;
+      const createTag = { name: 'Zeta' };
+      let tag;
 
-      return Folder.findOne()
+      return Tag.findOne()
         .then(dbData => {
-          folder = dbData;
+          tag = dbData;
           return chai.request(app)
-            .put(`/v3/tags/${folder.id}`)
-            .send(createFolder);
+            .put(`/v3/tags/${tag.id}`)
+            .send(createTag);
         })
         .then(apiRes => {
           expect(apiRes).to.have.status(200);
@@ -174,43 +174,43 @@ describe('DB and API tests for tags.routes.js', () => {
           expect(apiRes.body).to.be.an('object');
           expect(apiRes.body).to.have.keys('name', 'id');
 
-          expect(apiRes.body.id).to.equal(folder.id);
+          expect(apiRes.body.id).to.equal(tag.id);
         });
     });
 
     it('should respond with a 400 for a nonexistent id', () => {
-      const createFolder = { name: 'Whoop' };
+      const createTag = { name: 'Zeta' };
       const spy = chai.spy();
 
       return chai.request(app)
         .put('/v3/tags/1908')
-        .send(createFolder)
+        .send(createTag)
         .then(spy)
         .then(spy => expect(spy).to.have.not.been.called())
         .catch(err => {
           let res = err.response;
           expect(res).to.have.status(400);
-          expect(res.body.message).to.equal('Please input a proper id in order to complete this change');
+          expect(res.body.message).to.equal('Please input a 12 or 24 character length id');
         });
 
     });
 
     it('should return 404 when missing the `name` property', () => {
       const spy = chai.spy();
-      const createFolder = { name: '' };
+      const createTag = { name: '' };
 
-      return Folder.findOne()
+      return Tag.findOne()
         .then(dbData => {
           return chai.request(app)
             .put(`/v3/tags/${dbData.id}`)
-            .send(createFolder);
+            .send(createTag);
         })
         .then(spy)
         .then(spy => expect(spy).to.have.not.been.called())
         .catch(err => {
           let res = err.response;
           expect(res).to.have.status(404);
-          expect(res.body.message).to.equal('This folder must have a name!');
+          expect(res.body.message).to.equal('All tags must have a name');
         });
 
     });
@@ -222,7 +222,7 @@ describe('DB and API tests for tags.routes.js', () => {
 
     it('should delete an item by id', () => {
 
-      return Folder.findOne()
+      return Tag.findOne()
         .then(dbData => {
           return chai.request(app)
             .delete(`/v3/tags/${dbData.id}`);
@@ -242,7 +242,7 @@ describe('DB and API tests for tags.routes.js', () => {
         .catch(err => {
           let res = err.response;
           expect(res).to.have.status(400);
-          expect(res.body.message).to.equal('Please input a proper id in order to delete this folder');
+          expect(res.body.message).to.equal('Please input a 12 or 24 character length id');
         });
     });
 
