@@ -5,7 +5,7 @@ const router = express.Router(); // now I can use the router
 const mongoose = require('mongoose'); // and access my db
 
 const Tag = require('../models/tag.model'); // the collection I'll be referencing
-
+const Note = require('../models/note.model');
 
 
 /* ========== GET/READ ALL ITEM ========== */
@@ -56,8 +56,14 @@ router.post('/tags', (req, res, next) => {
   }
 
   Tag.create( {name} )
-    .then( tag => res.json(tag).status(200))
-    .catch(next);
+    .then( tag => res.location(`${req.originalUrl}/${tag.id}`).status(201).json(tag))
+    .catch(err => {
+      if (err.code === 11000) {
+        err = new Error('That tag name already exists');
+        err.status = 400;
+      }
+      next(err);
+    });
 
 });
 
@@ -88,9 +94,15 @@ router.put('/tags/:id', (req, res, next) => {
         return next(err);
       }
 
-      res.json(tag).status(201);
+      res.json(tag).status(200);
     })
-    .catch(next);
+    .catch(err => {
+      if (err.code === 11000) {
+        err = new Error('That tag name already exists');
+        err.status = 400;
+      }
+      next(err);
+    });
 
 });
 
@@ -105,23 +117,20 @@ router.delete('/tags/:id', (req, res, next) => {
     err.status = 400;
     return next(err);
   }
-
-  if (id === null) {
-    const err = new Error('That id cannot be found');
-    err.status = 404;
-    return next(err);
-  }
   
-  Tag.findByIdAndRemove(id)
-    .then( tag => {
-      if (tag === null) {
-        const err = new Error('That id cannot be found');
-        err.status = 404;
-        return next(err);
-      }
+  const removeTagPromise = Tag.findByIdAndRemove(id);
+  const removeTagFromNotesPromise = Note.updateMany( {tags: id}, {$pull: {tags: id}} );
 
-      res.status(204).end();
-    })
+  return Promise.all([removeTagPromise, removeTagFromNotesPromise])
+    .then(
+      ([tagResult]) => {
+        if (!tagResult) {
+          const err = new Error('That id cannot be found');
+          err.status = 404;
+          return next(err);
+        }
+        res.status(204).end();
+      })
     .catch(next);
 
 });

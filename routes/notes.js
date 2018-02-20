@@ -28,7 +28,7 @@ router.get('/notes', (req, res, next) => {
   }
   
   Note.find(filter, projection)
-    .select('title created folderId')
+    .select('title created folderId tags')
     .sort(sort)
     .then(notes => {
       res.json(notes);
