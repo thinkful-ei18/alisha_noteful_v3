@@ -442,7 +442,7 @@ const noteful = ( function () {
   // This object contains the only exposed methods from this module:
   return {
     render: render,
-    bindEventListeners: bindEventListeners,
+    bindEventListeners: bindEventListeners
   };
 
 }());
