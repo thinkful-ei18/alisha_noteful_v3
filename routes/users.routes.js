@@ -7,13 +7,13 @@ const User = require('../models/user.model');
 
 
 
-// router.get('/users/:id', (req, res) => {
+router.get('/users/:id', (req, res) => {
 
-//   return User.findById(req.params.id)
-//     .then(user => res.json(user.apiRepr()))
-//     .catch(err => res.status(500).json({ message: 'Internal server error' }));
+  return User.findById(req.params.id)
+    .then(user => res.json(user.apiRepr()))
+    .catch(err => res.status(500).json({ message: 'Internal server error' }));
 
-// });
+});
 
 
 router.post('/users', (req, res, next) => {
