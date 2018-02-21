@@ -3,6 +3,34 @@
 
 const noteful = ( function () {
 
+  /**
+   * SUPPORT FUNCTIONS
+   */
+
+  function showSuccessMessage(message) {
+    const el = $('.js-success-message');
+    el.text(message).show();
+    setTimeout(() => el.fadeOut('slow'), 3000);
+  }
+
+  function showFailureMessage(message) {
+    const el = $('.js-error-message');
+    el.text(message).show();
+    setTimeout(() => el.fadeOut('slow'), 3000);
+  }
+
+  function handleErrors(err) {
+    if (err.status === 401) {
+      store.authorized = false;
+      noteful.render();
+    }
+    showFailureMessage(err.responseJSON.message);
+  }
+
+  /**
+   * RENDER FUNCTION
+   */
+
   function render() {
 
     $('.signup-login').toggle(!store.authorized);
@@ -124,7 +152,8 @@ const noteful = ( function () {
         .then((response) => {
           store.currentNote = response;
           render();
-        });
+        })
+        .catch(handleErrors);
     });
   }
 
@@ -138,7 +167,8 @@ const noteful = ( function () {
         .then(response => {
           store.notes = response;
           render();
-        });
+        })
+        .catch(handleErrors);
     });
   }
 
@@ -165,7 +195,8 @@ const noteful = ( function () {
           .then(response => {
             store.notes = response;
             render();
-          });
+          })
+          .catch(handleErrors);
       } else {
         api.create('/v3/notes', noteObj)
           .then(createResponse => {
@@ -175,7 +206,8 @@ const noteful = ( function () {
           .then(response => {
             store.notes = response;
             render();
-          });
+          })
+          .catch(handleErrors);
       }
     });
   }
@@ -203,7 +235,8 @@ const noteful = ( function () {
         .then(response => {
           store.notes = response;
           render();
-        });
+        })
+        .catch(handleErrors);
     });
   }
 
@@ -224,7 +257,8 @@ const noteful = ( function () {
         .then(response => {
           store.notes = response;
           render();
-        });
+        })
+        .catch(handleErrors);
     });
   }
 
@@ -240,9 +274,8 @@ const noteful = ( function () {
         }).then(response => {
           store.folders = response;
           render();
-        }).catch(err => {
-          $('.js-error-message').text(err.responseJSON.message);
-        });
+        })
+        .catch(handleErrors);
     });
   }
 
@@ -268,7 +301,8 @@ const noteful = ( function () {
           store.notes = notes;
           store.folders = folders;
           render();
-        });
+        })
+        .catch(handleErrors);
     });
   }
 
@@ -289,7 +323,8 @@ const noteful = ( function () {
         .then(response => {
           store.notes = response;
           render();
-        });
+        })
+        .catch(handleErrors);
     });
   }
 
@@ -305,9 +340,7 @@ const noteful = ( function () {
           store.tags = response;
           render();
         })
-        .catch(err => {
-          console.error(err);
-        });
+        .catch(handleErrors);
     });
   }
 
@@ -334,7 +367,8 @@ const noteful = ( function () {
         .then(response => {
           store.notes = response;
           render();
-        });
+        })
+        .catch(handleErrors);
     });
   }
 
@@ -397,29 +431,6 @@ const noteful = ( function () {
     });
   }
 
-  /**
-   * SUPPORT FUNCTIONS
-   */
-
-  function showSuccessMessage(message) {
-    const el = $('.js-success-message');
-    el.text(message).show();
-    setTimeout(() => el.fadeOut('slow'), 3000);
-  }
-
-  function showFailureMessage(message) {
-    const el = $('.js-error-message');
-    el.text(message).show();
-    setTimeout(() => el.fadeOut('slow'), 3000);
-  }
-
-  function handleErrors(err) {
-    if (err.status === 401) {
-      store.authorized = false;
-      noteful.render();
-    }
-    showFailureMessage(err.responseJSON.message);
-  }
 
   
   function bindEventListeners() {
