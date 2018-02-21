@@ -372,12 +372,14 @@ const noteful = ( function () {
         password: loginForm.find('.js-password-entry').val()
       };
 
-      api.create('/v3/login', loginUser)
-        .then(response => {
+      api.create('/v3/login', loginUser) // go to routes/auth.js and hit the /login endpoint
+        .then(response => { // the AuthToken is returned from the /login route
+          store.authToken = response.authToken; // set the store.authToken to the returned authToken
           store.authorized = true;
-          loginForm[0].reset();
+          loginForm[0].reset(); // clear the login form
 
-          store.currentUser = response;
+          const payload = JSON.parse(atob(response.authToken.split('.')[1])); // split the authToken into 3 parts and grab index 1, which is the payload. then parse it and set received payload to the var payload.
+          store.currentUser = payload; // set the current user to the payload creds
 
           return Promise.all([
             api.search('/v3/notes'),
