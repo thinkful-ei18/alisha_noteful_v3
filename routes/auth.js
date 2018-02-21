@@ -5,9 +5,20 @@ const router = express.Router();
 const options = { session: false, failWithError: true };
 const passport = require('passport');
 const localAuth = passport.authenticate('local', options);
+const jwt = require('jsonwebtoken');
+const { JWT_EXPIRY, JWT_SECRET } = require('../config.js');
+
+
+function createAuthToken (user) {
+  return jwt.sign( {user}, JWT_SECRET, {
+    subject: user.username,
+    expiresIn: JWT_EXPIRY
+  });
+}
 
 router.post('/login', localAuth, (req, res) => {
-  return res.json(req.user);
+  const authToken = createAuthToken(req.user);
+  return res.json( {authToken} );
 
 });
 
