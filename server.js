@@ -8,6 +8,7 @@ const mongoose = require('mongoose');
 mongoose.Promise = global.Promise;
 const passport = require('passport');
 const localStrategy = require('./passport/local');
+const jwtStrategy = require('./passport/jwt');
 
 const { PORT, MONGODB_URI } = require('./config');
 
@@ -34,13 +35,21 @@ app.use(express.static('public'));
 app.use(express.json());
 
 passport.use(localStrategy);
+passport.use(jwtStrategy);
+
+// The usersRouter and authRouter need to be accessible to users without a JWT so they need to be mounted prior to utilizing jwt.
+app.use('/v3', usersRouter);
+app.use('/v3', authRouter);
+
+// use authentication
+app.use(passport.authenticate( 'jwt', {session: false, failWithError: true} ));
 
 // Mount router on "/api"
+// The notesRouter, foldersRouter and tagsRouter routers should be protected so they are mounted after utilizing jwt.
 app.use('/v3', notesRouter);
 app.use('/v3', foldersRouter);
 app.use('/v3', tagsRouter);
-app.use('/v3', usersRouter);
-app.use('/v3', authRouter);
+
 
 
 // Catch-all 404
