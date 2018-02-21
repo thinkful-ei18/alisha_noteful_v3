@@ -1,7 +1,7 @@
 /* global $ store api moment */
 'use strict';
 
-const noteful = (function () {
+const noteful = ( function () {
 
   function render() {
 
@@ -338,7 +338,7 @@ const noteful = (function () {
     });
   }
 
-    /**
+  /**
    * LOGIN EVENT LISTENERS AND HANDLERS
    */
 
@@ -393,30 +393,31 @@ const noteful = (function () {
         })
         .catch(handleErrors);
     });
+  }
 
-    /**
+  /**
    * SUPPORT FUNCTIONS
    */
 
-    function showSuccessMessage(message) {
-      const el = $('.js-success-message');
-      el.text(message).show();
-      setTimeout(() => el.fadeOut('slow'), 3000);
-    }
+  function showSuccessMessage(message) {
+    const el = $('.js-success-message');
+    el.text(message).show();
+    setTimeout(() => el.fadeOut('slow'), 3000);
+  }
 
-    function showFailureMessage(message) {
-      const el = $('.js-error-message');
-      el.text(message).show();
-      setTimeout(() => el.fadeOut('slow'), 3000);
-    }
+  function showFailureMessage(message) {
+    const el = $('.js-error-message');
+    el.text(message).show();
+    setTimeout(() => el.fadeOut('slow'), 3000);
+  }
 
-    function handleErrors(err) {
-      if (err.status === 401) {
-        store.authorized = false;
-        noteful.render();
-      }
-      showFailureMessage(err.responseJSON.message);
+  function handleErrors(err) {
+    if (err.status === 401) {
+      store.authorized = false;
+      noteful.render();
     }
+    showFailureMessage(err.responseJSON.message);
+  }
 
   
   function bindEventListeners() {
@@ -444,4 +445,4 @@ const noteful = (function () {
     bindEventListeners: bindEventListeners,
   };
 
-}());
+});
