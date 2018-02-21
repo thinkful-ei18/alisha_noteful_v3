@@ -7,18 +7,18 @@ const User = require('../models/user.model');
 
 
 
-router.get('/users/:id', (req, res) => {
+// router.get('/users/:id', (req, res) => {
 
-  return User.findById(req.params.id)
-    .then(user => res.json(user.apiRepr()))
-    .catch(err => res.status(500).json({ message: 'Internal server error' }));
+//   return User.findById(req.params.id)
+//     .then(user => res.json(user.apiRepr()))
+//     .catch(err => res.status(500).json({ message: 'Internal server error' }));
 
-});
+// });
 
 
 router.post('/users', (req, res, next) => {
 
-  // verify the required fields are present in the req.body
+  /* ===== verify the required fields are present in the req.body ===== */
   const requiredFields = [ 'username', 'password' ];
   const missingField = requiredFields.find( field => !(field in req.body));
 
@@ -28,7 +28,7 @@ router.post('/users', (req, res, next) => {
     return next(err);
   }
 
-  // verify that each of the fields are a string
+  /* ===== verify that each of the fields are a string ===== */
   const stringFields = [ 'username', 'password', 'fullname' ];
   const nonStringField = stringFields.find(
     field => field in req.body && typeof req.body[field] !== 'string'
@@ -40,7 +40,7 @@ router.post('/users', (req, res, next) => {
     return next(err);
   }
 
-  // verify that the un/pw don't have whitespace
+  /* ===== verify that the un/pw don't have whitespace ===== */
   const mandatoryTrimmedFields = ['username', 'password'];
   const nonTrimmedField = mandatoryTrimmedFields.find(
     field => req.body[field].trim() !== req.body[field]
@@ -52,7 +52,7 @@ router.post('/users', (req, res, next) => {
     return next(err);
   }
 
-  // verify that the length of the un/pw meet the requirements
+  /* ===== verify that the length of the un/pw meet the requirements ===== */
   const sizedFields = {
     username: { min: 1 },
     password: { min: 8, max: 72 } // bcrypt truncates after 72 characters
@@ -60,7 +60,7 @@ router.post('/users', (req, res, next) => {
 
   const tooSmallField = Object.keys(sizedFields).find(
     field =>
-      'min' in sizedFields[field] && // check the sizedFields key to see if it has the 'min' key
+      'min' in sizedFields[field] && // check the current sizedFields key to see if it has the 'min' property
       req.body[field].trim().length < sizedFields[field].min 
   );
 
@@ -101,15 +101,15 @@ router.post('/users', (req, res, next) => {
       }
       return User.hashPassword(password);
     })
-    .then(digest => {
+    .then( digest => { // a hashed pw is aka a "pw digest"
       return User.create({
         username,
-        password: digest,
+        password: digest, // set the value of the user's pw in the db to the hashed value
         fullname
       });
     })
-    .then(user => res.status(201).location(`/v3/users/${user.id}`).json(user.apiRepr())
-    .catch(err => {
+    .then( user => res.status(201).location(`/v3/users/${user.id}`).json(user.apiRepr()) )
+    .catch( err => {
       if (err.code === 11000) {
         err = new Error('The username already exists');
         err.status = 400;
