@@ -4,7 +4,7 @@ const { Strategy: LocalStrategy } = require('passport-local'); // const LocalStr
 const User = require('../models/user.model');
 
 const localStrategy = new LocalStrategy( (username, password, done) => {
- 
+  console.log('got inside of passport/local.js');
   let user;
   User.findOne({ username })
     .then(results => {

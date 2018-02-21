@@ -7,24 +7,27 @@ const noteful = ( function () {
    * SUPPORT FUNCTIONS
    */
 
-  function showSuccessMessage(message) {
-    const el = $('.js-success-message');
-    el.text(message).show();
-    setTimeout(() => el.fadeOut('slow'), 3000);
-  }
+  // function showSuccessMessage(message) {
+  //   const el = $('.js-success-message');
+  //   el.text(message).show();
+  //   setTimeout(() => el.fadeOut('slow'), 3000);
+  // }
 
-  function showFailureMessage(message) {
-    const el = $('.js-error-message');
-    el.text(message).show();
-    setTimeout(() => el.fadeOut('slow'), 3000);
-  }
+  // function showFailureMessage(message) {
+  //   console.log('received a message', message);
+  //   const el = $('.js-error-message');
+  //   el.text(message).show();
+  //   setTimeout(() => el.fadeOut('slow'), 3000);
+  // }
 
   function handleErrors(err) {
+    console.log('got into handleErrors', err);
     if (err.status === 401) {
       store.authorized = false;
       noteful.render();
     }
-    showFailureMessage(err.responseJSON.message);
+    // showFailureMessage(err.responseJSON.message);
+    $('.js-error-message').text('Invalid username or password!');
   }
 
   /**
