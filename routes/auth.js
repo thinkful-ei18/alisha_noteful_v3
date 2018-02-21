@@ -9,6 +9,13 @@ const jwt = require('jsonwebtoken');
 const { JWT_EXPIRY, JWT_SECRET } = require('../config.js');
 
 
+const jwtAuth = passport.authenticate('jwt', { session: false, failWithError: true });
+
+router.post('/refresh', jwtAuth, (req, res) => {
+  const authToken = createAuthToken(req.user);
+  res.json({ authToken });
+});
+
 function createAuthToken (user) {
   return jwt.sign( {user}, JWT_SECRET, {
     subject: user.username,
