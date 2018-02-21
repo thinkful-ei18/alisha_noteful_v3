@@ -2,6 +2,7 @@
 'use strict';
 
 $(document).ready(function () {
+  // console.log('NOTEFUL', noteful.bindEventListeners);
   noteful.bindEventListeners();
 
   // api.search('/v3/notes')
@@ -21,7 +22,7 @@ $(document).ready(function () {
   //     store.tags = response;
   //     noteful.render();
   //   });
-  noteful.render();
+  // noteful.render();
 
 });
 

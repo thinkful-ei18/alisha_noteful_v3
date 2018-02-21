@@ -445,4 +445,4 @@ const noteful = ( function () {
     bindEventListeners: bindEventListeners,
   };
 
-});
+}());
