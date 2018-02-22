@@ -108,6 +108,7 @@ router.put('/folders/:id', (req, res, next) => {
 /* ========== DELETE/REMOVE A SINGLE ITEM ========== */
 router.delete('/folders/:id', (req, res, next) => {
   const id = req.params.id;
+  const userId = req.user.id;
 
   if (!mongoose.Types.ObjectId.isValid(id)) {
     const err = new Error('Please input a proper id in order to delete this folder');
@@ -115,26 +116,10 @@ router.delete('/folders/:id', (req, res, next) => {
     return next(err);
   }
 
-  // deletes folder AND associated notes
-  Folder.findByIdAndRemove(id)
-    .then( () => Note.deleteMany({folderId: id}) )
-    .then( res.status(204).end() )
+  Folder.findOneAndRemove({ _id: id, userId })
+    .then(() => Note.updateMany({ folderId: id }, { $pull: { folderId: id }}) )
+    .then(res.status(204).end())
     .catch(next);
-
-  // on delete, set Note.folderId to null
-  // Folder.findByIdAndRemove(id)
-  //   .then( id => {
-  //     Note.updateMany({ folderId: id })
-  //   })
-  //   .then (
-  //     if (/* the id matches the folder*/) {
-  //       // delete
-  //     }
-  //   )
-  //   .then(res.status(204).end())
-  //   .catch(err => next(err));
-
-  // restrict the delete if the folder contains notes
 
 });
 

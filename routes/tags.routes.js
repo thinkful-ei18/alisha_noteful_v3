@@ -113,6 +113,7 @@ router.put('/tags/:id', (req, res, next) => {
 router.delete('/tags/:id', (req, res, next) => {
   
   const id = req.params.id;
+  const userId = req.user.id;
 
   if (!mongoose.Types.ObjectId.isValid(id)) {
     const err = new Error('Please input a 12 or 24 character length id');
@@ -120,14 +121,14 @@ router.delete('/tags/:id', (req, res, next) => {
     return next(err);
   }
   
-  const removeTagPromise = Tag.findByIdAndRemove(id);
+  const removeTagPromise = Tag.findOneAndRemove({ _id: id, userId });
   const removeTagFromNotesPromise = Note.updateMany( {tags: id}, {$pull: {tags: id}} );
 
   return Promise.all([removeTagPromise, removeTagFromNotesPromise])
     .then(
       ([tagResult]) => {
         if (!tagResult) {
-          const err = new Error('That id cannot be found');
+          const err = new Error('That tag id cannot be found');
           err.status = 404;
           return next(err);
         }
