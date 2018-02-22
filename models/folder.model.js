@@ -8,7 +8,7 @@ const folderSchema = mongoose.Schema({
 
 });
 
-folderSchema.createIndex({ name: 1, userId: 1 }, { unique: true }); // https://docs.mongodb.com/v3.0/tutorial/create-a-compound-index/
+folderSchema.index({ name: 1, userId: 1 }, { unique: true }); // http://mongoosejs.com/docs/guide.html#indexes
 
 
 // http://mongoosejs.com/docs/guide.html#toObject
