@@ -73,7 +73,8 @@ router.post('/tags', (req, res, next) => {
 router.put('/tags/:id', (req, res, next) => {
 
   const id = req.params.id;
-  const { name } = req.body;
+  const name = req.body.name;
+  const userId = req.user.id;
 
   if (!mongoose.Types.ObjectId.isValid(id)) {
     const err = new Error('Please input a 12 or 24 character length id');
@@ -87,7 +88,7 @@ router.put('/tags/:id', (req, res, next) => {
     return next(err);
   }
 
-  Tag.findByIdAndUpdate(id, {name}, {new: true})
+  Tag.findOneAndUpdate({ _id: id }, { name, userId }, { new: true })
     .then( tag => {
       if (tag === null) {
         const err = new Error('That id cannot be found');

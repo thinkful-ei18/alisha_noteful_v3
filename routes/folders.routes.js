@@ -82,9 +82,10 @@ router.post('/folders', (req, res, next) => {
 router.put('/folders/:id', (req, res, next) => {
   
   const id = req.params.id;
-  const { name } = req.body;
-  console.log('NAME', name);
-  console.log('ID', id);
+  const name = req.body.name;
+  const userId = req.user.id;
+
+
   if (!mongoose.Types.ObjectId.isValid(id)) {
     const err = new Error('Please input a proper id in order to complete this change');
     err.status = 400;
@@ -97,7 +98,7 @@ router.put('/folders/:id', (req, res, next) => {
     return next(err);
   }
 
-  Folder.findByIdAndUpdate( id, {name}, {new: true} )
+  Folder.findOneAndUpdate( {_id: id}, {name, userId}, {new: true} )
     .then( folder => res.json(folder))
     .catch(next);
 
