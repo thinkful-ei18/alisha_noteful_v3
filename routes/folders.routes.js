@@ -25,6 +25,8 @@ router.get('/folders', (req, res, next) => {
 
 /* ========== GET/READ A SINGLE ITEM ========== */
 router.get('/folders/:id', (req, res, next) => {
+  const userId = req.user.id;
+  const id = req.params.id;
 
   if (!mongoose.Types.ObjectId.isValid(req.params.id)) { // // mongoose requires ID's to be 16 characters. anything else will trigger this error. i.e. 'abc123'
     const err = new Error('Please input a proper id');
@@ -32,7 +34,7 @@ router.get('/folders/:id', (req, res, next) => {
     return next(err);
   }
 
-  Folder.findById(req.params.id)
+  Folder.findOne( {_id: id, userId} )
     .then( folder => {
       if (folder === null) { // i.e. '111111111111111111111105'. the format is right, but it doesn't match an id in the db
         const err = new Error('That id cannot be found');

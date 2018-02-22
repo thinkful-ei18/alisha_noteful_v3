@@ -22,7 +22,7 @@ router.get('/tags', (req, res, next) => {
 
 /* ========== GET/READ A SINGLE ITEM ========== */
 router.get('/tags/:id', (req, res, next) => {
-  
+  const userId = req.user.id;
   const id = req.params.id; 
 
   if (!mongoose.Types.ObjectId.isValid(id)) { // mongoose requires ID's to be 12 or 24 characters. anything else will trigger this error.
@@ -31,7 +31,7 @@ router.get('/tags/:id', (req, res, next) => {
     return next(err);
   }
 
-  Tag.findById(id)
+  Tag.findOne( {_id: id, userId} )
     .then( tag => {
       if (tag === null) {
         const err = new Error('That id cannot be found');
