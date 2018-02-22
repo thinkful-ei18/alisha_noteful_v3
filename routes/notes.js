@@ -12,7 +12,8 @@ const Note = require('../models/note.model');
 router.get('/notes', (req, res, next) => {
 
   const { searchTerm, folderId } = req.query;
-  
+  const userId = req.user.id;
+
   let filter = {};
   let projection = {};
   let sort = {created: -1}; // default sorting
@@ -27,7 +28,7 @@ router.get('/notes', (req, res, next) => {
     sort = projection;
   }
   
-  Note.find(filter, projection)
+  Note.find( filter, projection, userId )
     .select('title created folderId tags userId')
     .populate('tags folderId')
     .sort(sort)
