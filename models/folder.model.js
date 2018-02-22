@@ -3,11 +3,13 @@
 const mongoose = require('mongoose');
 
 const folderSchema = mongoose.Schema({
-  name: { 
-    type: String, 
-    unique: true // https://docs.mongodb.com/manual/core/index-unique/
-  } 
+  name: { type: String }, // https://docs.mongodb.com/manual/core/index-unique/
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }
+
 });
+
+folderSchema.createIndex({ name: 1, userId: 1 }, { unique: true }); // https://docs.mongodb.com/v3.0/tutorial/create-a-compound-index/
+
 
 // http://mongoosejs.com/docs/guide.html#toObject
 folderSchema.set('toObject', {
