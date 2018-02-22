@@ -29,6 +29,7 @@ router.get('/notes', (req, res, next) => {
   
   Note.find(filter, projection)
     .select('title created folderId tags userId')
+    .populate('tags folderId')
     .sort(sort)
     .then(notes => {
       res.json(notes);
@@ -51,7 +52,7 @@ router.get('/notes/:id', (req, res, next) => {
 
   Note.findOne( {_id: id, userId} )
     .select('title content created folderId tags')
-    .populate('tags')
+    .populate('tags folderId')
     .then( note => {
       if (note === null) {
         next();
@@ -67,7 +68,6 @@ router.get('/notes/:id', (req, res, next) => {
 router.post('/notes', (req, res, next) => {
 
   const { title, content, folderId, tags } = req.body;
-  console.log('REQ USER', req.user);
   const  userId  = req.user.id;
 
   if (!title || !content) {
