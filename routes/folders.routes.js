@@ -11,12 +11,11 @@ const Folder = require('../models/folder.model');
 
 /* ========== GET/READ ALL ITEM ========== */
 router.get('/folders', (req, res, next) => {
+  const userId = req.user.id;
 
-  Folder.find()
+  Folder.find( {userId} )
     .sort('name')
-    .then( folders => {
-      res.json(folders);
-    })
+    .then( folders => res.json(folders) )
     // .catch( err => next(err)); // this is the longer way of writing out the code below
     .catch(next);
 

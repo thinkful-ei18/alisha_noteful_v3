@@ -10,11 +10,12 @@ const Note = require('../models/note.model');
 
 /* ========== GET/READ ALL ITEM ========== */
 router.get('/tags', (req, res, next) => {
+  const userId = req.user.id;
 
-  Tag.find()
+  Tag.find( {userId} )
     .sort('name')
     .then( tags => res.json(tags))
-    .catch( err => next(err));
+    .catch(next);
 
 });
 
