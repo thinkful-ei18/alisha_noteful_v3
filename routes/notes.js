@@ -128,6 +128,7 @@ router.put('/notes/:id', (req, res, next) => {
 
 /* ========== DELETE/REMOVE A SINGLE ITEM ========== */
 router.delete('/notes/:id', (req, res, next) => {
+  const userId = req.user.id;
 
   if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
     const err = new Error('Request path id doesn\'t exist.');
@@ -135,9 +136,16 @@ router.delete('/notes/:id', (req, res, next) => {
     return next(err);
   }  
 
-  Note.findByIdAndRemove(req.params.id)
-    .then( res.status(204).end() )
-    .catch(err => next(err));
+  Note.findOneAndRemove({ _id : req.params.id, userId })
+    .then( count => {
+      if (count) {
+        return res.status(204).end();
+      }
+      const err = new Error('You don\'t have permission to delete this note');
+      err.status = 400;
+      next(err);
+    })
+    .catch(next);
 });
 
 module.exports = router;
