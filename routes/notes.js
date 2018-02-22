@@ -136,7 +136,7 @@ router.delete('/notes/:id', (req, res, next) => {
     return next(err);
   }  
 
-  Note.findOneAndRemove({ _id : req.params.id, userId })
+  Note.findOneAndRemove( {_id : req.params.id, userId} )
     .then( count => {
       if (count) {
         return res.status(204).end();
