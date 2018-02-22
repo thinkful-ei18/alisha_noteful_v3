@@ -52,7 +52,12 @@ router.get('/notes/:id', (req, res, next) => {
   Note.findOne( {_id: id, userId} )
     .select('title content created folderId tags')
     .populate('tags')
-    .then( note => res.json(note) )
+    .then( note => {
+      if (note === null) {
+        next();
+      }
+      res.json(note); 
+    })
     .catch(next);
 
 });
