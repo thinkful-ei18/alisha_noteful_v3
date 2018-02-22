@@ -7,12 +7,14 @@ const { MONGODB_URI } = require('../config');
 const Note = require('../models/note.model');
 const Folder = require('../models/folder.model');
 const Tag = require('../models/tag.model');
+const User = require('../models/user.model');
+
 
 
 const seedNotes = require('../db/seed/notes');
 const seedFolders = require('../db/seed/folders');
 const seedTags = require('../db/seed/tags');
-
+const seedUsers = require('../db/seed/users');
 
 
 mongoose.connect(MONGODB_URI)
@@ -24,7 +26,8 @@ mongoose.connect(MONGODB_URI)
       Folder.insertMany(seedFolders),
       Folder.createIndexes(),
       Tag.insertMany(seedTags),
-      Tag.createIndexes()
+      Tag.createIndexes(),
+      User.insertMany(seedUsers)
     ]);
   })
   .then( () => mongoose.disconnect() )
