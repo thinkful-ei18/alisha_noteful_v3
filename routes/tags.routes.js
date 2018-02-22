@@ -47,8 +47,8 @@ router.get('/tags/:id', (req, res, next) => {
 
 /* ========== POST/CREATE AN ITEM ========== */
 router.post('/tags', (req, res, next) => {
-
-  const { name } = req.body;
+  const name = req.body.name;
+  const userId = req.user.id;
 
   if (!name) {
     const err = new Error('All tags must have a name');
@@ -56,7 +56,7 @@ router.post('/tags', (req, res, next) => {
     return next(err);
   }
 
-  Tag.create( {name} )
+  Tag.create( {name, userId} )
     .then( tag => res.location(`${req.originalUrl}/${tag.id}`).status(201).json(tag))
     .catch(err => {
       if (err.code === 11000) {

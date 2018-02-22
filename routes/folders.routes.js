@@ -50,7 +50,8 @@ router.get('/folders/:id', (req, res, next) => {
 
 /* ========== POST/CREATE AN ITEM ========== */
 router.post('/folders', (req, res, next) => {
-  const { name } = req.body;
+  const name  = req.body.name;
+  const userId = req.user.id;
 
   if(!name) {
     const err = new Error('This folder has no name!');
@@ -58,7 +59,9 @@ router.post('/folders', (req, res, next) => {
     return next(err); 
   }
 
-  Folder.create( {name} )
+
+
+  Folder.create( {name, userId} )
     .then( folder => {
       res.location(`${req.originalUrl}/${folder.id}`)
         .status(201)
