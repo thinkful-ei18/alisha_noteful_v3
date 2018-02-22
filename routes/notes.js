@@ -40,16 +40,20 @@ router.get('/notes', (req, res, next) => {
 
 /* ========== GET/READ A SINGLE ITEM ========== */
 router.get('/notes/:id', (req, res, next) => {
+  const { id } = req.params;
+  const userId = req.user.id;
 
-  if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+  if (!mongoose.Types.ObjectId.isValid(id)) {
     const err = new Error('The `id` is not valid');
     err.status = 400;
     return next(err);
   }
 
-  Note.findById(req.params.id)
+  Note.findOne( {_id: id, userId} )
+    .select('title content created folderId tags')
+    .populate('tags')
     .then( note => res.json(note) )
-    .catch(err => next(err));
+    .catch(next);
 
 });
 
