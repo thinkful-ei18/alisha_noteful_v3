@@ -86,7 +86,9 @@ router.post('/notes', (req, res, next) => {
 /* ========== PUT/UPDATE A SINGLE ITEM ========== */
 router.put('/notes/:id', (req, res, next) => {
 
-  const { title, content, folderId } = req.body;
+  const { title, content, folderId, tags } = req.body;
+  const { id } = req.params;
+  const userId = req.user.id;
 
   if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
     const err = new Error (`Request path id: (${req.params.id}) doesn't exist.`);
@@ -104,14 +106,22 @@ router.put('/notes/:id', (req, res, next) => {
     title, 
     content, 
     folderId, 
+    tags,
+    userId,
     created: Date.now() 
   };
 
-  Note.findByIdAndUpdate(req.params.id, updatedNote, {new: true} )
+  Note.findOneAndUpdate( { _id: id} , updatedNote, {new: true} )
     .then( note => {
+
+      if (note.userId.toString() !== userId) {
+        const err = new Error('You don\'t have permission to update this note');
+        err.status = 400;
+        return next(err);
+      }
       res.json(note).status(204).end();
     })
-    .catch( err => next(err));
+    .catch(next);
 
 });
 
