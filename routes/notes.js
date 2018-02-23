@@ -6,6 +6,8 @@ const router = express.Router();
 const mongoose = require('mongoose');
 
 const Note = require('../models/note.model');
+const Folder = require('../models/folder.model');
+const Tag = require('../models/tag.model');
 
 
 /* ========== GET/READ ALL ITEM ========== */
@@ -70,16 +72,70 @@ router.post('/notes', (req, res, next) => {
 
   const { title, content, folderId, tags } = req.body;
   const  userId  = req.user.id;
+  // console.log('FOLDER ID', folderId);
+  // console.log('USER ID', userId);
 
   if (!title || !content) {
-    const err = new Error('Missing `title` or `content` in request body'); 
-    err.status = 400; 
-    return next(err); 
+    const err = new Error('Missing `title` or `content` in request body');
+    err.status = 400;
+    return next(err);
   }
 
-  Note.create( { title, content, folderId, tags, userId } )
-    .then( note => res.json(note))
+  Folder.find({ _id: folderId })
+    .count()
+    .then( count => {
+      // console.log('COUNT', count);
+      if (count === 1) {
+        // return Promise.resolve('ok');
+        tags.forEach( tag => {
+          if ( !(Tag.find({ _id: tag.id, userId })) ) {
+            const err = new Error(`You can't use the tag id: ${tag.id}`);
+            err.status = 404;
+            next(err);
+          }
+        });
+      } else {
+        const err = new Error('This note cannot be created in this folder');
+        err.status = 404;
+        next(err);
+      }
+    })
+    .catch(next);
+
+
+  Note.create({ title, content, folderId, tags, userId })
+    .then(note => res.json(note))
     .catch(err => next(err));
+  
+
+  // const verifyTag = tags.forEach( tag => { 
+  //   return Tag.find({ _id: tag.id, userId });
+  // })
+  //   .then( result => {
+  //     console.log('RESULT', result);
+  //     if (result.length = tags.length) {
+  //       return Promise.resolve('ok');
+  //     } else {
+  //       const err = new Error('This note cannot be created in this folder');
+  //       err.status = 404;
+  //       next(err);
+  //     }
+  //   })
+  //   .catch(next)
+
+
+  // const verifyTag = Tag.find({ userId })
+  //   .then( tags => {
+  //     tags.find(tag => )
+  //     if (count === 1) {
+  //       return Promise.resolve('ok');
+  //     }
+  //     else {
+  //       const err = new Error('This note cannot be created in this folder');
+  //       err.status = 404;
+  //       next(err);
+  //     }
+  //   }).catch(next);
 
 });
 
