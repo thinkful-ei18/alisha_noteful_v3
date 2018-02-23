@@ -10,7 +10,7 @@ const Folder = require('../models/folder.model');
 const Tag = require('../models/tag.model');
 
 
-/* ========== GET/READ ALL ITEM ========== */
+/* ========== GET/READ ALL NOTES ========== */
 router.get('/notes', (req, res, next) => {
 
   const { searchTerm, folderId } = req.query;
@@ -42,7 +42,7 @@ router.get('/notes', (req, res, next) => {
 });
 
 
-/* ========== GET/READ A SINGLE ITEM ========== */
+/* ========== GET/READ A SINGLE NOTE ========== */
 router.get('/notes/:id', (req, res, next) => {
   const { id } = req.params;
   const userId = req.user.id;
@@ -67,13 +67,13 @@ router.get('/notes/:id', (req, res, next) => {
 });
 
 
-/* ========== POST/CREATE AN ITEM ========== */
+/* ========== POST/CREATE A NOTE ========== */
 router.post('/notes', (req, res, next) => {
 
   const { title, content, folderId, tags } = req.body;
   const  userId  = req.user.id;
-  // console.log('FOLDER ID', folderId);
-  // console.log('USER ID', userId);
+
+  console.log('FID', folderId);
 
   if (!title || !content) {
     const err = new Error('Missing `title` or `content` in request body');
@@ -81,32 +81,71 @@ router.post('/notes', (req, res, next) => {
     return next(err);
   }
 
-  Folder.find({ _id: folderId })
-    .count()
-    .then( count => {
-      // console.log('COUNT', count);
-      if (count === 1) {
-        // return Promise.resolve('ok');
-        tags.forEach( tag => {
-          if ( !(Tag.find({ _id: tag.id, userId })) ) {
-            const err = new Error(`You can't use the tag id: ${tag.id}`);
+  // Folder.find({ _id: folderId, userId })
+  //   .count()
+  //   .then( count => {
+  //     if (count < 1) {
+  //       const err = new Error('Invalid folder id');
+  //       err.status = 404;
+  //       next(err);
+  //     }
+  //   })
+  //   .then( tags.map( tag => {
+  //     return Tag.find({ _id: tag, userId });
+  //   }) )
+  //   .then ( result => {
+  //     if (!result) {
+  //       const err = new Error('Invalid tag id');
+  //       err.status = 404;
+  //       next(err);
+  //     }
+  //   })
+  //   .catch(next);
+
+  if (folderId) {
+    Folder.find({ _id: folderId, userId })
+      .count()
+      .then(count => {
+        if (count < 1) {
+          const err = new Error('Invalid folder id');
+          err.status = 404;
+          next(err);
+        }
+      })
+      .catch(next);
+  }
+
+  if (tags.length > 0) {
+    tags.map( tag => {
+      return Tag.find({ _id: tag, userId })
+        .then( result => {
+          console.log('RESULT', result);
+          if (result.length < 1) {
+            const err = new Error('Invalid tag id');
             err.status = 404;
             next(err);
           }
-        });
-      } else {
-        const err = new Error('This note cannot be created in this folder');
-        err.status = 404;
-        next(err);
-      }
-    })
-    .catch(next);
-
+        })
+        .catch(next);
+    });
+  }
 
   Note.create({ title, content, folderId, tags, userId })
     .then(note => res.json(note))
     .catch(err => next(err));
-  
+
+  // tags.map(tag => {
+  //   console.log('TAG', tag);
+  //   return Tag.find({ _id: tag, userId })
+  //     .then(result => {
+  //       console.log('RESULT', result);
+  //       if (result.length < 1) {
+  //         const err = new Error(`You can't use the tag id: ${tag.id}`);
+  //         err.status = 404;
+  //         next(err);
+  //       }
+  //     });
+  // });
 
   // const verifyTag = tags.forEach( tag => { 
   //   return Tag.find({ _id: tag.id, userId });
@@ -140,7 +179,7 @@ router.post('/notes', (req, res, next) => {
 });
 
 
-/* ========== PUT/UPDATE A SINGLE ITEM ========== */
+/* ========== PUT/UPDATE A SINGLE NOTE ========== */
 router.put('/notes/:id', (req, res, next) => {
 
   const { title, content, folderId, tags } = req.body;
@@ -158,6 +197,25 @@ router.put('/notes/:id', (req, res, next) => {
     err.status = 400;
     return next(err);
   }  
+
+  // Folder.find({ _id: folderId })
+  //   .count()
+  //   .then(count => {
+  //     if (count === 1) {
+  //       tags.forEach(tag => {
+  //         if (!(Tag.find({ _id: tag.id, userId }))) {
+  //           const err = new Error(`You can't use the tag id: ${tag.id}`);
+  //           err.status = 404;
+  //           next(err);
+  //         }
+  //       });
+  //     } else {
+  //       const err = new Error('This note cannot be created in this folder');
+  //       err.status = 404;
+  //       next(err);
+  //     }
+  //   })
+  //   .catch(next);
 
   const updatedNote = { 
     title, 
@@ -183,7 +241,7 @@ router.put('/notes/:id', (req, res, next) => {
 });
 
 
-/* ========== DELETE/REMOVE A SINGLE ITEM ========== */
+/* ========== DELETE/REMOVE A SINGLE NOTE ========== */
 router.delete('/notes/:id', (req, res, next) => {
   const userId = req.user.id;
 
