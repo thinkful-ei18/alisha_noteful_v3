@@ -133,6 +133,34 @@ router.put('/notes/:id', (req, res, next) => {
     return next(err);
   }  
 
+  if (folderId) {
+    Folder.find({ _id: folderId, userId })
+      .then( result => {
+        console.log('RESULTS', result);
+        if (result.length < 1) {
+          const err = new Error('Invalid folder id');
+          err.status = 404;
+          next(err);
+        }
+        updatedNote.folderId = result;
+      })
+      .catch(next);
+  }
+
+  if (tags.length > 0) {
+    tags.map(tag => {
+      return Tag.find({ _id: tag, userId })
+        .then(result => {
+          console.log('RESULT', result);
+          if (result.length < 1) {
+            const err = new Error('Invalid tag id');
+            err.status = 404;
+            next(err);
+          }
+        })
+        .catch(next);
+    });
+  }
 
   const updatedNote = { 
     title, 
