@@ -38,11 +38,31 @@ describe('POST /v3/users', () => {
   describe('verify the required fields are present in the req.body', () => {
 
     it('should fail without a username', () => {
-
+      return chai.request(app)
+        .post('/v3/users')
+        .send({ password, fullName })
+        .then( res => {
+          expect(res).to.not.exist;
+        })
+        .catch( err => {
+          const res = err.response;
+          expect(res.body.message).to.equal('Missing \'username\' in request body');
+          expect(res).to.have.status(422);
+        });
     });
 
     it('should fail without a password', () => {
-
+      return chai.request(app)
+        .post('/v3/users')
+        .send({ username, fullName })
+        .then(res => {
+          expect(res).to.not.exist;
+        })
+        .catch(err => {
+          const res = err.response;
+          expect(res.body.message).to.equal('Missing \'password\' in request body');
+          expect(res).to.have.status(422);
+        });
     });
 
   });
