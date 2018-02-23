@@ -34,12 +34,11 @@ describe('POST /v3/users', () => {
   describe('verify the required fields are present in the req.body', () => {
     const username = 'steph30';
     const password = 'dubnation';
-    const fullname = 'Stephen Curry';
 
     it('should fail without a username', () => {
       return chai.request(app)
         .post('/v3/users')
-        .send({ password, fullname })
+        .send({ password })
         .then( res => {
           expect(res).to.not.exist;
         })
@@ -53,7 +52,7 @@ describe('POST /v3/users', () => {
     it('should fail without a password', () => {
       return chai.request(app)
         .post('/v3/users')
-        .send({ username, fullname })
+        .send({ username })
         .then(res => {
           expect(res).to.not.exist;
         })
@@ -116,13 +115,35 @@ describe('POST /v3/users', () => {
 
 
   describe('verify that the un/pw do not have whitespace', () => {
+    const username3 = 'steph30 ';
+    const password3 = 'dubnation ';
 
     it('should fail if the username has whitespace', () => {
-
+      chai.request(app)
+        .post('/v3/users')
+        .send({ username3 })
+        .then(res => {
+          expect(res).to.not.exist;
+        })
+        .catch(err => {
+          const res = err.response;
+          expect(res.body.message).to.equal('Field: \'username3\' cannot start or end with whitespace');
+          expect(res).to.have.status(422);
+        });
     });
 
     it('should fail if the password has whitespace', () => {
-
+      chai.request(app)
+        .post('/v3/users')
+        .send({ password3 })
+        .then(res => {
+          expect(res).to.not.exist;
+        })
+        .catch(err => {
+          const res = err.response;
+          expect(res.body.message).to.equal('Field: \'password3\' cannot start or end with whitespace');
+          expect(res).to.have.status(422);
+        });
     });
 
   });
