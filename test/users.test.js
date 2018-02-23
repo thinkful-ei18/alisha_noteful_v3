@@ -150,17 +150,50 @@ describe('POST /v3/users', () => {
 
 
   describe('verify that the length of the un/pw meet the requirements', () => {
+    const username = '';
+    const password = 'seven';
+    const password2 = 'wakanda.wakanda.wakanda.wakanda.wakanda.wakanda.wakanda.wakanda.wakanda.!';
 
     it('should fail if the username has less than 1 character', () => {
-
+      chai.request(app)
+        .post('/v3/users')
+        .send({ username })
+        .then(res => {
+          expect(res).to.not.exist;
+        })
+        .catch(err => {
+          const res = err.response;
+          expect(res.body.message).to.equal('Field: \'username\' must be at least 1 characters long');
+          expect(res).to.have.status(422);
+        });
     });
 
     it('should fail if the password has less than 8 characters', () => {
-
+      chai.request(app)
+        .post('/v3/users')
+        .send({ password })
+        .then(res => {
+          expect(res).to.not.exist;
+        })
+        .catch(err => {
+          const res = err.response;
+          expect(res.body.message).to.equal('Field: \'password\' must be at least 8 characters long');
+          expect(res).to.have.status(422);
+        });
     });
 
     it('should fail if the password has more than 72 characters', () => {
-
+      chai.request(app)
+        .post('/v3/users')
+        .send({ password2 })
+        .then(res => {
+          expect(res).to.not.exist;
+        })
+        .catch(err => {
+          const res = err.response;
+          expect(res.body.message).to.equal('Field: \'password2\' must be at least 1 characters long');
+          expect(res).to.have.status(422);
+        });
     });
 
   });
