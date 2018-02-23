@@ -13,6 +13,7 @@ chai.use(chaiHttp);
 
 
 /* ========== TESTING HOOKS ========== */
+
 before(function () {
   return mongoose.connect(TEST_MONGODB_URI, { autoIndex: false });
 });
@@ -29,11 +30,11 @@ after(function () {
 
 
 /* ========== ROUTE TESTS ========== */
-describe.only('POST /v3/users', () => {
+describe.only('/v3/users', () => {
 
   describe('verify the required fields are present in the req.body', () => {
-    const username = 'steph30';
-    const password = 'dubnation';
+    const username = 'shuri';
+    const password = 'wakandaforever';
 
     it('should fail without a username', () => {
       return chai.request(app)
@@ -69,9 +70,9 @@ describe.only('POST /v3/users', () => {
   describe('verify that each of the fields are a string', () => {
 
     it('should fail if the username is not a string', () => {
-      chai.request(app)
+      return chai.request(app)
         .post('/v3/users')
-        .send({username: false, password: 'dubnation'})
+        .send({ username: false, password: 'wakandaforever' })
         .then( res => {
           expect(res).to.not.exist;
         })
@@ -83,9 +84,9 @@ describe.only('POST /v3/users', () => {
     });
 
     it('should fail if the password is not a string', () => {
-      chai.request(app)
+      return chai.request(app)
         .post('/v3/users')
-        .send({ username: 'steph30', password: false })
+        .send({ username: 'shuri', password: false })
         .then(res => {
           expect(res).to.not.exist;
         })
@@ -97,9 +98,9 @@ describe.only('POST /v3/users', () => {
     });
 
     it('should fail if the fullname is not a string', () => {
-      chai.request(app)
+      return chai.request(app)
         .post('/v3/users')
-        .send({ username: 'steph30', password: 'dubnation', fullname: false })
+        .send({ username: 'shuri', password: 'wakandaforever', fullname: false })
         .then(res => {
           expect(res).to.not.exist;
         })
@@ -114,13 +115,13 @@ describe.only('POST /v3/users', () => {
 
 
   describe('verify that the un/pw do not have whitespace', () => {
-    const username = 'steph30 ';
-    const password = 'dubnation ';
+    const username = 'shuri ';
+    const password = 'wakandaforever ';
 
     it('should fail if the username has whitespace', () => {
-      chai.request(app)
+      return chai.request(app)
         .post('/v3/users')
-        .send({ username, password: 'dubnation' })
+        .send({ username, password: 'wakandaforever' })
         .then(res => {
           expect(res).to.not.exist;
         })
@@ -132,9 +133,9 @@ describe.only('POST /v3/users', () => {
     });
 
     it('should fail if the password has whitespace', () => {
-      chai.request(app)
+      return chai.request(app)
         .post('/v3/users')
-        .send({ username: 'steph30', password })
+        .send({ username: 'shuri', password })
         .then(res => {
           expect(res).to.not.exist;
         })
@@ -154,9 +155,9 @@ describe.only('POST /v3/users', () => {
     const password2 = 'wakandawakandawakandawakandawakandawakandawakandawakandawakandawakandawakanda';
 
     it('should fail if the username has less than 1 character', () => {
-      chai.request(app)
+      return chai.request(app)
         .post('/v3/users')
-        .send({ username: '', password:'dubnation' })
+        .send({ username, password:'wakandaforever' })
         .then(res => {
           expect(res).to.not.exist;
         })
@@ -168,9 +169,9 @@ describe.only('POST /v3/users', () => {
     });
 
     it('should fail if the password has less than 8 characters', () => {
-      chai.request(app)
+      return chai.request(app)
         .post('/v3/users')
-        .send({ username: 'steph30', password })
+        .send({ username: 'shuri', password })
         .then(res => {
           expect(res).to.not.exist;
         })
@@ -182,9 +183,9 @@ describe.only('POST /v3/users', () => {
     });
 
     it('should fail if the password has more than 72 characters', () => {
-      chai.request(app)
+      return chai.request(app)
         .post('/v3/users')
-        .send({ username: 'steph30', password: password2 })
+        .send({ username: 'shuri', password: password2 })
         .then(res => {
           expect(res).to.not.exist;
         })
@@ -198,16 +199,37 @@ describe.only('POST /v3/users', () => {
   });
 
 
-  it('should trim the whitespace off the fullname prop', () => {
+  describe('user creation', () => {
+    const username = 'shuri';
+    const password = 'wakandaforever';
 
-  });
+    it('should trim the whitespace off the fullname prop', () => {
 
-  it('should fail if the username already exists', () => {
+    });
 
-  });
+    it('should fail if the username already exists', () => {
 
-  it('should create a new user', () => {
+    });
 
+    it('should create a new user', () => {
+      return chai.request(app)
+        .post('/v3/users')
+        .send({ username, password })
+        .then(res => {
+          expect(res).to.have.status(201);
+          expect(res.body).to.be.an('object');
+          expect(res.body).to.have.keys('username', 'fullname', 'id');
+          expect(res.body.username).to.equal(username);
+          return User.findOne({ username: username });
+        })
+        .then(user => {
+          expect(user).to.not.be.null;
+          return user.validatePassword(password);
+        })
+        .then(result => {
+          expect(result).to.be.true;
+        });
+    });
   });
 
 
