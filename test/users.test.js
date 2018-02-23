@@ -29,7 +29,7 @@ after(function () {
 
 
 /* ========== ROUTE TESTS ========== */
-describe('POST /v3/users', () => {
+describe.only('POST /v3/users', () => {
 
   describe('verify the required fields are present in the req.body', () => {
     const username = 'steph30';
@@ -67,18 +67,17 @@ describe('POST /v3/users', () => {
 
 
   describe('verify that each of the fields are a string', () => {
-    const { username2, password2, fullname2 } = false;
 
     it('should fail if the username is not a string', () => {
       chai.request(app)
         .post('/v3/users')
-        .send({ username2 })
+        .send({username: false, password: 'dubnation'})
         .then( res => {
           expect(res).to.not.exist;
         })
         .catch( err => {
           const res = err.response;
-          expect(res.body.message).to.equal('Field: \'username2\' must be type String');
+          expect(res.body.message).to.equal('Field: \'username\' must be type String');
           expect(res).to.have.status(422);
         });
     });
@@ -86,13 +85,13 @@ describe('POST /v3/users', () => {
     it('should fail if the password is not a string', () => {
       chai.request(app)
         .post('/v3/users')
-        .send({ password2 })
+        .send({ username: 'steph30', password: false })
         .then(res => {
           expect(res).to.not.exist;
         })
         .catch(err => {
           const res = err.response;
-          expect(res.body.message).to.equal('Field: \'password2\' must be type String');
+          expect(res.body.message).to.equal('Field: \'password\' must be type String');
           expect(res).to.have.status(422);
         });
     });
@@ -100,13 +99,13 @@ describe('POST /v3/users', () => {
     it('should fail if the fullname is not a string', () => {
       chai.request(app)
         .post('/v3/users')
-        .send({ fullname2 })
+        .send({ username: 'steph30', password: 'dubnation', fullname: false })
         .then(res => {
           expect(res).to.not.exist;
         })
         .catch(err => {
           const res = err.response;
-          expect(res.body.message).to.equal('Field: \'fullname2\' must be type String');
+          expect(res.body.message).to.equal('Field: \'fullname\' must be type String');
           expect(res).to.have.status(422);
         });
     });
@@ -115,19 +114,19 @@ describe('POST /v3/users', () => {
 
 
   describe('verify that the un/pw do not have whitespace', () => {
-    const username3 = 'steph30 ';
-    const password3 = 'dubnation ';
+    const username = 'steph30 ';
+    const password = 'dubnation ';
 
     it('should fail if the username has whitespace', () => {
       chai.request(app)
         .post('/v3/users')
-        .send({ username3 })
+        .send({ username, password: 'dubnation' })
         .then(res => {
           expect(res).to.not.exist;
         })
         .catch(err => {
           const res = err.response;
-          expect(res.body.message).to.equal('Field: \'username3\' cannot start or end with whitespace');
+          expect(res.body.message).to.equal('Field: \'username\' cannot start or end with whitespace');
           expect(res).to.have.status(422);
         });
     });
@@ -135,13 +134,13 @@ describe('POST /v3/users', () => {
     it('should fail if the password has whitespace', () => {
       chai.request(app)
         .post('/v3/users')
-        .send({ password3 })
+        .send({ username: 'steph30', password })
         .then(res => {
           expect(res).to.not.exist;
         })
         .catch(err => {
           const res = err.response;
-          expect(res.body.message).to.equal('Field: \'password3\' cannot start or end with whitespace');
+          expect(res.body.message).to.equal('Field: \'password\' cannot start or end with whitespace');
           expect(res).to.have.status(422);
         });
     });
@@ -152,12 +151,12 @@ describe('POST /v3/users', () => {
   describe('verify that the length of the un/pw meet the requirements', () => {
     const username = '';
     const password = 'seven';
-    const password2 = 'wakanda.wakanda.wakanda.wakanda.wakanda.wakanda.wakanda.wakanda.wakanda.!';
+    const password2 = 'wakandawakandawakandawakandawakandawakandawakandawakandawakandawakandawakanda';
 
     it('should fail if the username has less than 1 character', () => {
       chai.request(app)
         .post('/v3/users')
-        .send({ username })
+        .send({ username: '', password:'dubnation' })
         .then(res => {
           expect(res).to.not.exist;
         })
@@ -171,7 +170,7 @@ describe('POST /v3/users', () => {
     it('should fail if the password has less than 8 characters', () => {
       chai.request(app)
         .post('/v3/users')
-        .send({ password })
+        .send({ username: 'steph30', password })
         .then(res => {
           expect(res).to.not.exist;
         })
@@ -185,13 +184,13 @@ describe('POST /v3/users', () => {
     it('should fail if the password has more than 72 characters', () => {
       chai.request(app)
         .post('/v3/users')
-        .send({ password2 })
+        .send({ username: 'steph30', password: password2 })
         .then(res => {
           expect(res).to.not.exist;
         })
         .catch(err => {
           const res = err.response;
-          expect(res.body.message).to.equal('Field: \'password2\' must be at least 1 characters long');
+          expect(res.body.message).to.equal('Field: \'password\' must be at most 72 characters long');
           expect(res).to.have.status(422);
         });
     });
