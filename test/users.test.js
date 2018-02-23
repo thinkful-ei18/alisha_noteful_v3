@@ -203,15 +203,26 @@ describe.only('/v3/users', () => {
     const username = 'shuri';
     const password = 'wakandaforever';
 
-    it('should trim the whitespace off the fullname prop', () => {
-
-    });
-
     it('should fail if the username already exists', () => {
-
+      return User.create({ username, password })
+        .then(() => {
+          return chai.request(app).post('/v3/users').send({ username, password });
+        })
+        .then(res => {
+          expect(res).to.not.exist;
+        })
+        .catch(err => {
+          const res = err.response;
+          expect(res.body.message).to.equal('Username already taken');
+          // console.log('RES', res.body.error); // 
+          /**** the below tests won't work because res.body.error is an empty obj per the err handler on server.js ****/
+          // expect(res).to.have.status(422); 
+          // expect(res.body.error.reason).to.equal('ValidationError');
+          // expect(res.body.location).to.equal('username');
+        });
     });
 
-    it('should create a new user', () => {
+    it('should create a new user and make sure the pw is hashed', () => {
       return chai.request(app)
         .post('/v3/users')
         .send({ username, password })
