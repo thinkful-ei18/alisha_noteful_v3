@@ -31,16 +31,15 @@ after(function () {
 /* ========== ROUTE TESTS ========== */
 describe('POST /v3/users', () => {
 
-  const username = 'steph30';
-  const password = 'dubnation';
-  const fullName = 'Stephen Curry';
-
   describe('verify the required fields are present in the req.body', () => {
+    const username = 'steph30';
+    const password = 'dubnation';
+    const fullname = 'Stephen Curry';
 
     it('should fail without a username', () => {
       return chai.request(app)
         .post('/v3/users')
-        .send({ password, fullName })
+        .send({ password, fullname })
         .then( res => {
           expect(res).to.not.exist;
         })
@@ -54,7 +53,7 @@ describe('POST /v3/users', () => {
     it('should fail without a password', () => {
       return chai.request(app)
         .post('/v3/users')
-        .send({ username, fullName })
+        .send({ username, fullname })
         .then(res => {
           expect(res).to.not.exist;
         })
@@ -69,17 +68,48 @@ describe('POST /v3/users', () => {
 
 
   describe('verify that each of the fields are a string', () => {
+    const { username2, password2, fullname2 } = false;
 
     it('should fail if the username is not a string', () => {
-
+      chai.request(app)
+        .post('/v3/users')
+        .send({ username2 })
+        .then( res => {
+          expect(res).to.not.exist;
+        })
+        .catch( err => {
+          const res = err.response;
+          expect(res.body.message).to.equal('Field: \'username2\' must be type String');
+          expect(res).to.have.status(422);
+        });
     });
 
     it('should fail if the password is not a string', () => {
-
+      chai.request(app)
+        .post('/v3/users')
+        .send({ password2 })
+        .then(res => {
+          expect(res).to.not.exist;
+        })
+        .catch(err => {
+          const res = err.response;
+          expect(res.body.message).to.equal('Field: \'password2\' must be type String');
+          expect(res).to.have.status(422);
+        });
     });
 
     it('should fail if the fullname is not a string', () => {
-
+      chai.request(app)
+        .post('/v3/users')
+        .send({ fullname2 })
+        .then(res => {
+          expect(res).to.not.exist;
+        })
+        .catch(err => {
+          const res = err.response;
+          expect(res.body.message).to.equal('Field: \'fullname2\' must be type String');
+          expect(res).to.have.status(422);
+        });
     });
 
   });
