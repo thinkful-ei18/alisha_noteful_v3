@@ -5,27 +5,25 @@ const chai = require('chai');
 const chaiHttp = require('chai-http');
 const chaiSpies = require('chai-spies');
 const mongoose = require('mongoose');
-const seedNotes = require('../db/seed/notes.json');
 const Note = require('../models/note.model');
-const expect = chai.expect;
+const seedNotes = require('../db/seed/notes.json');
+
 const jwt = require('jsonwebtoken');
-const { JWT_SECRET, JWT_EXPIRY } = require('../config');
+const { JWT_SECRET, JWT_EXPIRY, TEST_MONGODB_URI } = require('../config');
 
-
-const { TEST_MONGODB_URI } = require('../config.js');
-
+const expect = chai.expect;
 chai.use(chaiHttp);
 chai.use(chaiSpies);
 
-function createAuthToken(user) {
-  return jwt.sign({ user }, JWT_SECRET, {
-    subject: user.username,
-    expiresIn: JWT_EXPIRY
-  });
-}
+const user = {
+  'username': 'steph30',
+  'id': '555555555555555555555555'
+};
 
-const authToken = createAuthToken({ 'username': 'shuri', 'fullname': 'princess shuri', 'id': '333333333333333333333333' });
-
+const authToken = jwt.sign({ user }, JWT_SECRET, {
+  subject: user.username,
+  expiresIn: JWT_EXPIRY
+});
 
 
 /* ========== TESTING HOOKS ========== */
@@ -49,33 +47,35 @@ after(function () {
 
 
 /* ========== ROUTE TESTS ========== */
-describe('DB and API tests for notes.js', () => {
+/* ========== First we make a direct call from the client to the db so we know the data is right. Then make a call to the db THROUGH the API. Finally we make sure they match. ========== */
+
+describe.only('DB and API tests for notes.js', () => {
 
   describe('GET methods /v3/notes', () => {
 
     it('should return unsearched notes list', () => {
-      const dbPromise = Note.find();
-      const apiPromise = chai.request(app).get('/v3/notes');
+      const dbPromise = Note.find({ userId: user.id });
+      const apiPromise = chai.request(app).get('/v3/notes').set({'Authorization': `Bearer ${authToken}`});
 
       return Promise.all([dbPromise, apiPromise])
         .then( ([dbData, apiRes]) => {
           expect(apiRes).to.have.status(200);
           expect(apiRes).to.be.json;
-          expect(apiRes.body).to.be.a('array');
+          expect(apiRes.body).to.be.an('array');
           expect(apiRes.body).to.have.length(dbData.length);
         });
     });
 
-    it.only('should return the notes resulting from a search', () => {
+    it('should return the notes resulting from a search', () => {
       let term = 'ways';
 
       const dbPromise = Note.find(
-        { $text: { $search: term } },
+        { userId: user.id, $text: { $search: term } },
         { score: { $meta: 'textScore' } })
         .sort({ score: { $meta: 'textScore' } });
       const apiPromise = chai.request(app)
         .get(`/v3/notes?searchTerm=${term}`)
-        .set({ 'authorization': `Bearer ${authToken}` });
+        .set({ 'Authorization': `Bearer ${authToken}` });
 
       return Promise.all([dbPromise, apiPromise])
         .then(([dbData, apiRes]) => {
@@ -94,10 +94,12 @@ describe('DB and API tests for notes.js', () => {
     it('should return one note', () => {
       let dbData;
 
-      return Note.findOne().select('id title content')
+      return Note.findOne({ userId: user.id }).select('id title content')
         .then( result => {
           dbData = result;
-          return chai.request(app).get(`/v3/notes/${dbData.id}`);
+          return chai.request(app)
+            .get(`/v3/notes/${dbData.id}`)
+            .set({ 'Authorization': `Bearer ${authToken}` });
         })
         .then( apiRes => {
           expect(apiRes).to.have.status(200);
@@ -116,6 +118,7 @@ describe('DB and API tests for notes.js', () => {
       const spy = chai.spy();
 
       return chai.request(app).get(`/v3/notes/${badId}`)
+        .set({ 'Authorization': `Bearer ${authToken}` })
         .then(spy)
         .then(() => {
           expect(spy).to.not.have.been.called();
@@ -133,26 +136,37 @@ describe('DB and API tests for notes.js', () => {
   describe('POST methods /v3/notes', () => {
 
     it('should post one note', () => {
-      let createdNote = {
+      let newNote = {
         title: 'amazing grace',
-        content: 'how sweet the sound'
+        content: 'how sweet the sound',
+        folderId: '111111111111111111111102',
+        tags: ['222222222222222222222200'],
+        userId: user.id
       };
 
       let note;
-      return Note.create(createdNote)
+
+      return Note.create(newNote)
         .then( dbData => {
           note = dbData;
-          return chai.request(app).get(`/v3/notes/${dbData.id}`);
+          return chai.request(app)
+            .post('/v3/notes/')
+            .send(newNote)
+            .set({ 'Authorization': `Bearer ${authToken}` });
         })
         .then( apiRes => {
           expect(apiRes).to.have.status(200);
           expect(apiRes).to.be.json;
           expect(apiRes.body).to.be.a('object');
-          expect(apiRes.body).to.have.keys('title', 'content', 'id', 'created', 'tags');
+          expect(apiRes.body).to.have.keys('created', 'title', 'content', 'folderId', 'tags', 'userId', 'id');
 
-          expect(apiRes.body.id).to.equal(note.id);
           expect(apiRes.body.title).to.equal(note.title);
           expect(apiRes.body.content).to.equal(note.content);
+
+          /* === can't test the below because json uses "" but esLint requires '', so they don't strictly equal. the numbers inside the quotes will match though === */
+          // expect(apiRes.body.tags).to.equal(note.tags);
+          // expect(apiRes.body.folderId).to.equal(note.folderId);
+          // expect(apiRes.body.userId).to.equal(note.userId);
         });
     });
 
@@ -163,6 +177,7 @@ describe('DB and API tests for notes.js', () => {
       const spy = chai.spy();
 
       return chai.request(app).post('/v3/notes/')
+        .set({ 'Authorization': `Bearer ${authToken}` })
         .send(invalidNote)
         .then(spy)
         .then(() => {
@@ -183,8 +198,11 @@ describe('DB and API tests for notes.js', () => {
 
     it('should update the note', () => {
       const updateNote = {
-        'title': 'that saved a wretch like me',
-        'content': 'I once was lost, but now am found'
+        title: 'amazing grace',
+        content: 'how sweet the sound',
+        folderId: '111111111111111111111102',
+        tags: ['222222222222222222222200'],
+        userId: user.id
       };
     
       let note;
@@ -194,13 +212,14 @@ describe('DB and API tests for notes.js', () => {
           note = dbData;
           return chai.request(app)
             .put(`/v3/notes/${note.id}`)
+            .set({ 'Authorization': `Bearer ${authToken}` })
             .send(updateNote);
         })
         .then(apiRes => {
           expect(apiRes).to.have.status(200);
           expect(apiRes).to.be.json;
           expect(apiRes.body).to.be.a('object');
-          expect(apiRes.body).to.have.keys('title', 'content', 'id', 'created', 'folderId', 'tags');
+          expect(apiRes.body).to.have.keys('title', 'content', 'id', 'created', 'folderId', 'tags', 'userId');
 
           expect(apiRes.body.id).to.equal(note.id);
           expect(apiRes.body.title).to.equal(updateNote.title);
@@ -218,6 +237,7 @@ describe('DB and API tests for notes.js', () => {
 
       return chai.request(app)
         .put(`/v3/notes/${badId}`)
+        .set({ 'Authorization': `Bearer ${authToken}` })
         .send(updateNote)
         .then(spy)
         .then(() => {
@@ -237,6 +257,7 @@ describe('DB and API tests for notes.js', () => {
 
       return chai.request(app)
         .put('/v3/notes/000000000000000000000002')
+        .set({ 'Authorization': `Bearer ${authToken}` })
         .send(invalidNote)
         .then(spy)
         .then(() => {
@@ -260,7 +281,8 @@ describe('DB and API tests for notes.js', () => {
         .then( dbData => {
           note = dbData;
           return chai.request(app)
-            .delete(`/v3/notes/${note.id}`);
+            .delete(`/v3/notes/${note.id}`)
+            .set({ 'Authorization': `Bearer ${authToken}` });
         })
         .then(response => {
           expect(response).to.have.status(204);
@@ -272,6 +294,7 @@ describe('DB and API tests for notes.js', () => {
 
       return chai.request(app)
         .delete('/v3/notes/1908')
+        .set({ 'Authorization': `Bearer ${authToken}` })
         .then(spy)
         .then(() => {
           expect(spy).to.have.not.been.called();
