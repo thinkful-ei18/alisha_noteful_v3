@@ -30,7 +30,7 @@ after(function () {
 
 
 /* ========== ROUTE TESTS ========== */
-describe.only('/v3/users', () => {
+describe('/v3/users', () => {
 
   describe('verify the required fields are present in the req.body', () => {
     const username = 'shuri';

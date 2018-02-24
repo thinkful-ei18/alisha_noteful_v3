@@ -8,11 +8,23 @@ const mongoose = require('mongoose');
 const seedNotes = require('../db/seed/notes.json');
 const Note = require('../models/note.model');
 const expect = chai.expect;
+const jwt = require('jsonwebtoken');
+const { JWT_SECRET, JWT_EXPIRY } = require('../config');
+
 
 const { TEST_MONGODB_URI } = require('../config.js');
 
 chai.use(chaiHttp);
 chai.use(chaiSpies);
+
+function createAuthToken(user) {
+  return jwt.sign({ user }, JWT_SECRET, {
+    subject: user.username,
+    expiresIn: JWT_EXPIRY
+  });
+}
+
+const authToken = createAuthToken({ 'username': 'shuri', 'fullname': 'princess shuri', 'id': '333333333333333333333333' });
 
 
 
@@ -54,7 +66,7 @@ describe('DB and API tests for notes.js', () => {
         });
     });
 
-    it('should return the notes resulting from a search', () => {
+    it.only('should return the notes resulting from a search', () => {
       let term = 'ways';
 
       const dbPromise = Note.find(
@@ -62,7 +74,8 @@ describe('DB and API tests for notes.js', () => {
         { score: { $meta: 'textScore' } })
         .sort({ score: { $meta: 'textScore' } });
       const apiPromise = chai.request(app)
-        .get(`/v3/notes?searchTerm=${term}`);
+        .get(`/v3/notes?searchTerm=${term}`)
+        .set({ 'authorization': `Bearer ${authToken}` });
 
       return Promise.all([dbPromise, apiPromise])
         .then(([dbData, apiRes]) => {
