@@ -41,7 +41,7 @@ after(function () {
 /* ========== ROUTE TESTS ========== */
 describe('authenticated routes', () => {
 
-  describe('/v3/refresh', () => {
+  describe('tests for /v3/refresh', () => {
 
     it('should update the expiry date on the token', () => {
       const authToken = jwt.sign({ user }, JWT_SECRET, {
@@ -69,11 +69,39 @@ describe('authenticated routes', () => {
     });
 
     it('should fail without a valid token', () => {
+      const authToken = jwt.sign({ user }, 'FAKE_SECRET', {
+        algorithm: 'HS256',
+        expiresIn: '1d'
+      });
 
+      return chai.request(app)
+        .post('/v3/refresh')
+        .set({ 'Authorization': `Bearer ${authToken}` })
+        .then(res => {
+          expect(res).to.not.exist;
+        })
+        .catch(err => {
+          const res = err.response;
+          expect(res).to.have.status(401);
+        });
     });
 
     it('should fail with an expired token', () => {
+      const authToken = jwt.sign({ user, exp: Math.floor(Date.now() / 1000) - 10}, JWT_SECRET, {
+        algorithm: 'HS256',
+        subject: user.username
+      });
 
+      return chai.request(app)
+        .post('/v3/refresh')
+        .set({ 'Authorization': `Bearer ${authToken}` })
+        .then(res => {
+          expect(res).to.not.exist;
+        })
+        .catch(err => {
+          const res = err.response;
+          expect(res).to.have.status(401);
+        });
     });
 
   });
