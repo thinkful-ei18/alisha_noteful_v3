@@ -49,7 +49,7 @@ after(function () {
 /* ========== ROUTE TESTS ========== */
 /* ========== First we make a direct call from the client to the db so we know the data is right. Then make a call to the db THROUGH the API. Finally we make sure they match. ========== */
 
-describe.only('DB and API tests for notes.js', () => {
+describe('DB and API tests for notes.js', () => {
 
   describe('GET methods /v3/notes', () => {
 

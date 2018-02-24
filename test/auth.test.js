@@ -11,8 +11,10 @@ const { JWT_SECRET, JWT_EXPIRY, TEST_MONGODB_URI } = require('../config');
 
 chai.use(chaiHttp);
 
-const username = 'shuri';
-const password = 'wakandaforever';
+const user = {
+  'username': 'shuri',
+  'password': 'wakandaforever'
+};
 
 
 /* ========== TESTING HOOKS ========== */
@@ -22,11 +24,8 @@ before(function () {
 });
 
 beforeEach(function () { 
-  return User.hashPassword(password).then( hashedPassword =>
-    User.create({
-      username,
-      password
-    })
+  return User.hashPassword(user.password).then( hashedUser =>
+    User.create(user)
   );
 });
 
@@ -45,7 +44,28 @@ describe('authenticated routes', () => {
   describe('/v3/refresh', () => {
 
     it('should update the expiry date on the token', () => {
+      const authToken = jwt.sign({ user }, JWT_SECRET, {
+        algorithm: 'HS256',
+        subject: user.username,
+        expiresIn: JWT_EXPIRY
+      });
 
+      const decoded = jwt.decode(authToken);
+
+      return chai.request(app)
+        .post('/v3/refresh')
+        .set({ 'Authorization': `Bearer ${authToken}` })
+        .then(res => {
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.an('object');
+          const authToken = res.body.authToken;
+          expect(authToken).to.be.a('string');
+          const payload = jwt.verify(authToken, JWT_SECRET, {
+            algorithm: ['HS256']
+          });
+          expect(payload.user).to.deep.equal(user);
+          expect(payload.exp).to.be.at.least(decoded.exp);
+        });
     });
 
     it('should fail without a valid token', () => {
