@@ -109,20 +109,50 @@ describe('authenticated routes', () => {
 
   describe('/v3/login', () => {
 
-    it('should login with a proper un/pw', () => {
+    it('should create a token upon login', () => {
+      // not working. 'Error: Unauthorized' ??
 
+      return chai.request(app)
+        .post('/v3/login')
+        .send(user)
+        .then(res => {
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.an('object');
+          const authToken = res.body.authToken;
+          expect(authToken).to.be.a('string');
+          const payload = jwt.verify(authToken, JWT_SECRET, {
+            algorithm: ['HS256']
+          });
+          expect(payload.user).to.deep.equal(user);
+        });
     });
 
     it('should fail without a proper username', () => {
-
+      return chai
+        .request(app)
+        .post('/v3/login')
+        .send({ username: 'Okoye', password: 'wakandaforever' })
+        .then(res => {
+          expect(res).to.not.exist;
+        })
+        .catch(err => {
+          const res = err.response;
+          expect(res).to.have.status(401);
+        });
     });
 
     it('should fail without a proper password', () => {
-
-    });
-
-    it('should create a token upon login', () => {
-
+      return chai
+        .request(app)
+        .post('/v3/login')
+        .send({ username: 'shuri', password: 'princess' })
+        .then(res => {
+          expect(res).to.not.exist;
+        })
+        .catch(err => {
+          const res = err.response;
+          expect(res).to.have.status(401);
+        });
     });
 
   });
